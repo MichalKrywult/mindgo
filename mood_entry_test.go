@@ -32,8 +32,16 @@ func TestNewMoodEntryWithIncorrectDate(t *testing.T) {
 	}
 }
 
-func TestNewMoodEntryWithIncorrectMoodValue(t *testing.T) {
+func TestNewMoodEntryWithMoodValueAboveRange(t *testing.T) {
 	_, err := NewMoodEntry(12, "2022/12/13", "Test")
+
+	if err == nil {
+		t.Error("Expected an error for an invalid mood value")
+	}
+}
+
+func TestNewMoodEntryWithMoodValueBelowRange(t *testing.T) {
+	_, err := NewMoodEntry(0, "2022/12/13", "Test")
 
 	if err == nil {
 		t.Error("Expected an error for an invalid mood value")
