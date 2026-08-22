@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type MoodTracker struct {
 	entries []MoodEntry
 	entryID int
@@ -20,4 +22,15 @@ func (tracker MoodTracker) GetEntries() []MoodEntry {
 	copy(entries, tracker.entries)
 	//now we can copy tracker.entries into entries
 	return entries
+}
+
+func (tracker MoodTracker) findIndexByID(id int) (int, error) {
+	//again, without pointer receiver (*) because this method doesn't modify the tracker
+	for index, entry := range tracker.entries {
+		if entry.ID == id {
+			return index, nil
+		}
+
+	}
+	return -1, fmt.Errorf("ID %d doesn't exist", id)
 }

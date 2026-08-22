@@ -49,3 +49,39 @@ func TestGetEntries(t *testing.T) {
 		t.Error("Entries ID are invalid")
 	}
 }
+
+func TestFindIndexByID(t *testing.T) {
+	tracker := MoodTracker{}
+
+	entry := MoodEntry{Mood: 2, Date: "2022/12/13", Note: "Test"}
+
+	tracker.AddEntry(entry)
+	tracker.AddEntry(entry)
+
+	index, err := tracker.findIndexByID(1)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if index != 0 {
+		t.Errorf("Expected %d, got %d", 0, index)
+	}
+
+	index, err = tracker.findIndexByID(2)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if index != 1 {
+		t.Errorf("Expected %d, got %d", 1, index)
+	}
+
+	index, err = tracker.findIndexByID(3)
+	if err == nil {
+		t.Fatalf("Expected error, got nil")
+	}
+
+	if index != -1 {
+		t.Errorf("Expected %d, got %d", -1, index)
+	}
+}
