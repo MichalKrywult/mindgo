@@ -85,6 +85,24 @@ func TestFindIndexByID(t *testing.T) {
 		t.Errorf("Expected %d, got %d", -1, index)
 	}
 }
+
+func TestFindEntryByID(t *testing.T) {
+	tracker := MoodTracker{}
+
+	entry := MoodEntry{Mood: 2, Date: "2022/12/13", Note: "Test"}
+
+	tracker.AddEntry(entry)
+	tracker.AddEntry(entry)
+
+	data, err := tracker.findEntryByID(1)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if data.ID != 1 {
+		t.Errorf("Expected %d, got %d", 1, data.ID)
+	}
+}
 func TestRemoveEntry(t *testing.T) {
 	tracker := MoodTracker{}
 

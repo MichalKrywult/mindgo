@@ -16,6 +16,7 @@ func main() {
 	fmt.Println(tracker.GetEntries())
 	fmt.Println("Mood created and added correctly")
 	fmt.Println(tracker.findIndexByID(2))
+	fmt.Println(tracker.findEntryByID(2))
 
 	err = tracker.RemoveEntry(1)
 	if err != nil {
