@@ -3,6 +3,7 @@ package main
 import "errors"
 
 type MoodEntry struct {
+	ID   int
 	Mood int
 	Date string
 	Note string

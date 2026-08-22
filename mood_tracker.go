@@ -2,10 +2,13 @@ package main
 
 type MoodTracker struct {
 	entries []MoodEntry
+	entryID int
 }
 
 func (tracker *MoodTracker) AddEntry(entry MoodEntry) {
 	// pointer receiver (*) because this method modifies the tracker
+	tracker.entryID++
+	entry.ID = tracker.entryID
 	tracker.entries = append(tracker.entries, entry)
 }
 

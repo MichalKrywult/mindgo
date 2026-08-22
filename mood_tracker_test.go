@@ -44,4 +44,8 @@ func TestGetEntries(t *testing.T) {
 	if tracker.entries[0].Mood == 99 {
 		t.Error("Modifying returned entries changed tracker state")
 	}
+
+	if data[0].ID != 1 || data[1].ID != 2 {
+		t.Error("Entries ID are invalid")
+	}
 }
