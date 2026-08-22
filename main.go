@@ -12,5 +12,6 @@ func main() {
 	tracker := MoodTracker{}
 	tracker.AddEntry(entry)
 
+	fmt.Println(tracker.GetEntries())
 	fmt.Println("Mood created and added correctly")
 }

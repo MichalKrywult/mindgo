@@ -26,3 +26,22 @@ func TestAddEntry(t *testing.T) {
 		t.Errorf("Expected note to be %q, got %s", "Test", tracker.entries[0].Note)
 	}
 }
+
+func TestGetEntries(t *testing.T) {
+	tracker := MoodTracker{}
+
+	entry := MoodEntry{Mood: 2, Date: "2022/12/13", Note: "Test"}
+
+	tracker.AddEntry(entry)
+	tracker.AddEntry(entry)
+
+	data := tracker.GetEntries()
+	if len(data) != len(tracker.entries) {
+		t.Errorf("Expected %d entries, got %d", len(tracker.entries), len(data))
+	}
+
+	data[0].Mood = 99
+	if tracker.entries[0].Mood == 99 {
+		t.Error("Modifying returned entries changed tracker state")
+	}
+}
