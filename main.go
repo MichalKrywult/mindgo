@@ -24,4 +24,5 @@ func main() {
 	} else {
 		fmt.Println("Entry removed correctly")
 	}
+	showCLI()
 }
