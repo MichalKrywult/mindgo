@@ -111,23 +111,33 @@ func TestRemoveEntry(t *testing.T) {
 	tracker.AddEntry(entry)
 	tracker.AddEntry(entry)
 
-	err := tracker.RemoveEntry(4)
-	if err == nil {
-		t.Errorf("Error was expected, got: %v instead", err)
-	}
-
-	err = tracker.RemoveEntry(2)
+	err := tracker.RemoveEntry(2)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
 	data := tracker.GetEntries()
 	if len(data) != 2 {
-		t.Errorf("Entry wasn't removed from the tracker")
+		t.Error("Entry wasn't removed from the tracker")
 	}
 
 	if data[0].ID != 1 || data[1].ID != 3 {
-		t.Errorf("Wrong entry was removed from the tracker")
+		t.Error("Wrong entry was removed from the tracker")
+	}
+}
+
+func TestRemoveEntryWithInvalidID(t *testing.T) {
+	tracker := MoodTracker{}
+
+	entry := MoodEntry{Mood: 2, Date: "2022/12/13", Note: "Test"}
+	tracker.AddEntry(entry)
+
+	err := tracker.RemoveEntry(4)
+	if err == nil {
+		t.Error("Expected an error when removing an entry with an invalid ID")
 	}
 
+	if len(tracker.entries) != 1 {
+		t.Error("Tracker was modified after attempting to remove an invalid ID")
+	}
 }
