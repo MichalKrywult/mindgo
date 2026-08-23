@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func showCLI() {
+func showCLI(tracker *MoodTracker) { // we used & reference, so now we have to 'catch' it with * pointer
 	fmt.Println("=====MENU=====")
 	fmt.Println("1. New entry")
 	fmt.Println("2. Remove entry")
@@ -15,7 +15,25 @@ func showCLI() {
 
 	switch choice {
 	case 1:
-		fmt.Println("Choice 1")
+
+		var entry MoodEntry
+
+		fmt.Println("Your mood score:")
+		fmt.Scan(&entry.Mood)
+
+		fmt.Println("Date:")
+		fmt.Scan(&entry.Date)
+
+		fmt.Println("Note:")
+		fmt.Scan(&entry.Note)
+
+		entry, err := NewMoodEntry(entry.Mood, entry.Date, entry.Note)
+		if err != nil {
+			fmt.Println("Something went wrong:", err)
+			return
+		}
+
+		tracker.AddEntry(entry)
 	case 2:
 		fmt.Println("Choice 2")
 	case 3:
