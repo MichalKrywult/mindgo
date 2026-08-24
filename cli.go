@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func showCLI(tracker *MoodTracker) { // we used & reference, so now we have to 'catch' it with * pointer
+func displayMenuAndReadChoice() int {
 	fmt.Println("=====MENU=====")
 	fmt.Println("1. New entry")
 	fmt.Println("2. Remove entry")
@@ -13,34 +13,61 @@ func showCLI(tracker *MoodTracker) { // we used & reference, so now we have to '
 	var choice int
 	fmt.Scan(&choice) //& means using adress of a variable, Scan saves input to that variable
 
-	switch choice {
-	case 1:
+	return choice
+}
 
-		var entry MoodEntry
+func displayAllEntries(tracker MoodTracker) {
 
-		fmt.Println("Your mood score:")
-		fmt.Scan(&entry.Mood)
+	entries := tracker.GetEntries()
 
-		fmt.Println("Date:")
-		fmt.Scan(&entry.Date)
+	if len(entries) == 0 {
+		fmt.Print("You don't have any entries\n")
+		return
+	}
 
-		fmt.Println("Note:")
-		fmt.Scan(&entry.Note)
+	fmt.Print("All of your entries:\n")
+	for i := range entries {
+		fmt.Printf("%d. %v | %v | %v\n", i+1, entries[i].Mood, entries[i].Date, entries[i].Note)
+	}
+}
 
-		entry, err := NewMoodEntry(entry.Mood, entry.Date, entry.Note)
-		if err != nil {
-			fmt.Println("Something went wrong:", err)
+func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer to a MoodTracker type
+
+	for {
+		choice := displayMenuAndReadChoice()
+		switch choice {
+		case 1:
+			var entry MoodEntry
+
+			fmt.Println("Your mood score:")
+			fmt.Scan(&entry.Mood)
+
+			fmt.Println("Date:")
+			fmt.Scan(&entry.Date)
+
+			fmt.Println("Note:")
+			fmt.Scan(&entry.Note)
+
+			entry, err := NewMoodEntry(entry.Mood, entry.Date, entry.Note)
+			if err != nil {
+				fmt.Println("Something went wrong:", err)
+				return
+			}
+			tracker.AddEntry(entry)
+			fmt.Println("Entry added!")
+
+		case 2:
+			fmt.Println("Choice 2")
+		case 3:
+			fmt.Println("Choice 3")
+			displayAllEntries(*tracker) // passing a copy of a tracker to the function
+		case 4:
+			fmt.Println("Choice 4")
+		case 0:
+			fmt.Println("Exit")
 			return
+		default:
+			fmt.Println("Invalid choice")
 		}
-
-		tracker.AddEntry(entry)
-	case 2:
-		fmt.Println("Choice 2")
-	case 3:
-		fmt.Println("Choice 3")
-	case 4:
-		fmt.Println("Choice 4")
-	default:
-		fmt.Println("Invalid choice")
 	}
 }
