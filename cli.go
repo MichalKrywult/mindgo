@@ -68,7 +68,21 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 			fmt.Println("Entry added!")
 
 		case 2:
-			fmt.Println("Choice 2")
+			fmt.Println("Which entry would you like to delete?")
+			displayAllEntries(*tracker)
+
+			fmt.Println("Number of entry to delete:")
+			var choice int
+			fmt.Scan(&choice)
+
+			entryID := tracker.entries[choice-1].ID
+
+			err := tracker.RemoveEntry(entryID)
+			if err != nil {
+				fmt.Println("Unexpected error:", err)
+			}
+
+			fmt.Println("Entry removed succesfully")
 		case 3:
 			fmt.Println("Choice 3")
 			displayAllEntries(*tracker) // passing a copy of a tracker to the function
