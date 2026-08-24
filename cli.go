@@ -8,6 +8,7 @@ func displayMenuAndReadChoice() int {
 	fmt.Println("2. Remove entry")
 	fmt.Println("3. Show history")
 	fmt.Println("4. Show statistics")
+	fmt.Println("0. Exit")
 
 	fmt.Println("Your choice: ")
 	var choice int
@@ -29,6 +30,16 @@ func displayAllEntries(tracker MoodTracker) {
 	for i := range entries {
 		fmt.Printf("%d. %v | %v | %v\n", i+1, entries[i].Mood, entries[i].Date, entries[i].Note)
 	}
+}
+
+func displayAverageMood(tracker MoodTracker) {
+	average, err := tracker.CalculateAverageMood()
+	if err != nil {
+		fmt.Print("You don't have any entries\n")
+		return
+	}
+
+	fmt.Printf("Your average mood: %v\n", average)
 }
 
 func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer to a MoodTracker type
@@ -63,6 +74,7 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 			displayAllEntries(*tracker) // passing a copy of a tracker to the function
 		case 4:
 			fmt.Println("Choice 4")
+			displayAverageMood(*tracker)
 		case 0:
 			fmt.Println("Exit")
 			return
