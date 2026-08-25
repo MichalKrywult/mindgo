@@ -45,7 +45,7 @@ func (tracker MoodTracker) findIndexByID(id int) (int, error) {
 	return -1, fmt.Errorf("ID %d doesn't exist", id)
 }
 
-func (tracker *MoodTracker) RemoveEntry(id int) error {
+func (tracker *MoodTracker) RemoveEntryByID(id int) error {
 	// pointer receiver (*) because this method modifies the tracker
 	index, err := tracker.findIndexByID(id)
 	if err != nil {

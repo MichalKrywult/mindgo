@@ -77,7 +77,7 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 
 			entryID := tracker.entries[choice-1].ID
 
-			err := tracker.RemoveEntry(entryID)
+			err := tracker.RemoveEntryByID(entryID)
 			if err != nil {
 				fmt.Println("Unexpected error:", err)
 			}

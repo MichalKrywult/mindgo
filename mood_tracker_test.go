@@ -111,7 +111,7 @@ func TestRemoveEntry(t *testing.T) {
 	tracker.AddEntry(entry)
 	tracker.AddEntry(entry)
 
-	err := tracker.RemoveEntry(2)
+	err := tracker.RemoveEntryByID(2)
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestRemoveEntryWithInvalidID(t *testing.T) {
 	entry := MoodEntry{Mood: 2, Date: "2022/12/13", Note: "Test"}
 	tracker.AddEntry(entry)
 
-	err := tracker.RemoveEntry(4)
+	err := tracker.RemoveEntryByID(4)
 	if err == nil {
 		t.Error("Expected an error when removing an entry with an invalid ID")
 	}
