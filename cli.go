@@ -42,28 +42,42 @@ func displayAverageMood(tracker MoodTracker) {
 	fmt.Printf("Your average mood: %v\n", average)
 }
 
+func readMoodEntry() (MoodEntry, error) {
+	var entry MoodEntry
+
+	fmt.Println("Your mood score:")
+	fmt.Scan(&entry.Mood)
+
+	fmt.Println("Date:")
+	fmt.Scan(&entry.Date)
+
+	fmt.Println("Note:")
+	fmt.Scan(&entry.Note)
+
+	entry, err := NewMoodEntry(entry.Mood, entry.Date, entry.Note)
+	return entry, err
+}
+
+func (tracker *MoodTracker) GetEntryID(index int) (int, error) {
+	if index < 0 || index >= len(tracker.entries) {
+		return 0, fmt.Errorf("invalid entry index")
+	}
+
+	return tracker.entries[index].ID, nil
+}
+
 func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer to a MoodTracker type
 
 	for {
 		choice := displayMenuAndReadChoice()
 		switch choice {
 		case 1:
-			var entry MoodEntry
-
-			fmt.Println("Your mood score:")
-			fmt.Scan(&entry.Mood)
-
-			fmt.Println("Date:")
-			fmt.Scan(&entry.Date)
-
-			fmt.Println("Note:")
-			fmt.Scan(&entry.Note)
-
-			entry, err := NewMoodEntry(entry.Mood, entry.Date, entry.Note)
+			entry, err := readMoodEntry()
 			if err != nil {
 				fmt.Println("Something went wrong:", err)
 				return
 			}
+
 			tracker.AddEntry(entry)
 			fmt.Println("Entry added!")
 
@@ -75,14 +89,20 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 			var choice int
 			fmt.Scan(&choice)
 
-			entryID := tracker.entries[choice-1].ID
-
-			err := tracker.RemoveEntryByID(entryID)
+			entryID, err := tracker.GetEntryID(choice - 1)
 			if err != nil {
-				fmt.Println("Unexpected error:", err)
+				fmt.Println("Invalid entry number")
+				continue
 			}
 
-			fmt.Println("Entry removed succesfully")
+			err = tracker.RemoveEntryByID(entryID)
+			if err != nil {
+				fmt.Println("Unexpected error:", err)
+				return
+			}
+
+			fmt.Println("Entry removed successfully")
+
 		case 3:
 			fmt.Println("Choice 3")
 			displayAllEntries(*tracker) // passing a copy of a tracker to the function
