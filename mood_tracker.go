@@ -57,3 +57,16 @@ func (tracker *MoodTracker) RemoveEntryByID(id int) error {
 	// ... separates slice into separate arguments
 	return nil
 }
+
+func (tracker *MoodTracker) EditEntryByID(id int, entry MoodEntry) error {
+	// pointer receiver (*) because this method modifies the tracker
+	index, err := tracker.findIndexByID(id)
+	if err != nil {
+		return err
+	}
+
+	entry.ID = id
+	tracker.entries[index] = entry
+
+	return nil
+}

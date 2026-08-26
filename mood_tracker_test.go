@@ -141,3 +141,50 @@ func TestRemoveEntryWithInvalidID(t *testing.T) {
 		t.Error("Tracker was modified after attempting to remove an invalid ID")
 	}
 }
+
+func TestEditEntryByID(t *testing.T) {
+	tracker := MoodTracker{}
+
+	tracker.AddEntry(MoodEntry{Mood: 2, Date: "2022/12/13", Note: "Old"})
+
+	err := tracker.EditEntryByID(1, MoodEntry{Mood: 5, Date: "2022/12/14", Note: "New"})
+
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	data := tracker.GetEntries()
+
+	if len(data) != 1 {
+		t.Fatalf("Expected 1 entry, got %d", len(data))
+	}
+
+	if data[0].ID != 1 {
+		t.Errorf("Expected ID 1, got %d", data[0].ID)
+	}
+
+	if data[0].Mood != 5 {
+		t.Errorf("Expected mood 5, got %d", data[0].Mood)
+	}
+
+	if data[0].Note != "New" {
+		t.Errorf("Expected note %q, got %q", "New", data[0].Note)
+	}
+}
+
+func TestEditEntryByIDWithInvalidID(t *testing.T) {
+	tracker := MoodTracker{}
+
+	entry := MoodEntry{Mood: 2, Date: "2022/12/13", Note: "Test"}
+	tracker.AddEntry(entry)
+
+	err := tracker.EditEntryByID(2, entry)
+	if err == nil || len(tracker.GetEntries()) != 1 {
+		t.Error("Expected an error for invalid ID")
+	}
+
+	data := tracker.GetEntries()
+	if data[0].ID != 1 {
+		t.Error("Transaction was edited despite wrong ID")
+	}
+}
