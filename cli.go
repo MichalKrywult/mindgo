@@ -1,6 +1,31 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
+
+var scanner = bufio.NewScanner(os.Stdin)
+
+func readLine() (string, error) {
+	if !scanner.Scan() {
+		return "", scanner.Err()
+	}
+
+	return strings.TrimSpace(scanner.Text()), nil
+}
+
+func readInt() (int, error) {
+	text, err := readLine()
+	if err != nil {
+		return 0, err
+	}
+
+	return strconv.Atoi(text)
+}
 
 func displayMenuAndReadChoice() int {
 	fmt.Println("=====MENU=====")
@@ -11,9 +36,11 @@ func displayMenuAndReadChoice() int {
 	fmt.Println("5. Show statistics")
 	fmt.Println("0. Exit")
 
-	fmt.Println("Your choice: ")
-	var choice int
-	fmt.Scan(&choice) //& means using adress of a variable, Scan saves input to that variable
+	fmt.Print("Your choice: ")
+	choice, err := readInt()
+	if err != nil {
+		return -1
+	}
 
 	return choice
 }
@@ -44,19 +71,25 @@ func displayAverageMood(tracker MoodTracker) {
 }
 
 func readNewMoodEntry() (MoodEntry, error) {
-	var entry MoodEntry
+	fmt.Print("Mood score (1-10): ")
+	mood, err := readInt()
+	if err != nil {
+		return MoodEntry{}, err
+	}
 
-	fmt.Println("Your mood score:")
-	fmt.Scan(&entry.Mood)
+	fmt.Print("Date: ")
+	date, err := readLine()
+	if err != nil {
+		return MoodEntry{}, err
+	}
 
-	fmt.Println("Date:")
-	fmt.Scan(&entry.Date)
+	fmt.Print("Note: ")
+	note, err := readLine()
+	if err != nil {
+		return MoodEntry{}, err
+	}
 
-	fmt.Println("Note:")
-	fmt.Scan(&entry.Note)
-
-	entry, err := NewMoodEntry(entry.Mood, entry.Date, entry.Note)
-	return entry, err
+	return NewMoodEntry(mood, date, note)
 }
 
 func (tracker MoodTracker) getEntryID(index int) (int, error) {
@@ -91,8 +124,11 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 			}
 
 			fmt.Println("Number of entry to edit:")
-			var choice int
-			fmt.Scan(&choice)
+			choice, err := readInt()
+			if err != nil {
+				fmt.Println("Invalid entry")
+				continue
+			}
 
 			entryID, err := tracker.getEntryID(choice - 1)
 			if err != nil {
@@ -117,8 +153,11 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 			}
 
 			fmt.Println("Number of entry to delete:")
-			var choice int
-			fmt.Scan(&choice)
+			choice, err := readInt()
+			if err != nil {
+				fmt.Println("Invalid entry")
+				continue
+			}
 
 			entryID, err := tracker.getEntryID(choice - 1)
 			if err != nil {
