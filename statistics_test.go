@@ -2,13 +2,15 @@ package main
 
 import (
 	"testing"
+	"time"
 )
 
 func TestCalculateAverageMood(t *testing.T) {
 	tracker := MoodTracker{}
 
-	entry1 := MoodEntry{Mood: 2, Date: "2022/12/13", Note: "Test"}
-	entry2 := MoodEntry{Mood: 4, Date: "2022/12/14", Note: "Test"}
+	entry1 := MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
+	time.Sleep(100 * time.Millisecond)
+	entry2 := MoodEntry{Mood: 4, Date: time.Now(), Note: "Test"}
 
 	tracker.AddEntry(entry1)
 	tracker.AddEntry(entry2)
