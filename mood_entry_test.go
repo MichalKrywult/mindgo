@@ -2,10 +2,12 @@ package main
 
 import (
 	"testing"
+	"time"
 )
 
 func TestNewMoodEntryWithCorrectData(t *testing.T) {
-	entry, err := NewMoodEntry(2, "2022/12/13", "Test")
+	time := time.Now()
+	entry, err := NewMoodEntry(2, time, "Test")
 
 	if err != nil {
 		t.Fatalf("NewMoodEntry() returned an error: %v", err)
@@ -15,7 +17,7 @@ func TestNewMoodEntryWithCorrectData(t *testing.T) {
 		t.Errorf("Mood = %d, expected 2", entry.Mood)
 	}
 
-	if entry.Date != "2022/12/13" {
+	if entry.Date != time {
 		t.Errorf("Date = %q, expected %q", entry.Date, "2022/12/13")
 	}
 
@@ -24,16 +26,8 @@ func TestNewMoodEntryWithCorrectData(t *testing.T) {
 	}
 }
 
-func TestNewMoodEntryWithIncorrectDate(t *testing.T) {
-	_, err := NewMoodEntry(2, "", "Test")
-
-	if err == nil {
-		t.Error("Expected an error for an empty date")
-	}
-}
-
 func TestNewMoodEntryWithMoodValueAboveRange(t *testing.T) {
-	_, err := NewMoodEntry(12, "2022/12/13", "Test")
+	_, err := NewMoodEntry(12, time.Now(), "Test")
 
 	if err == nil {
 		t.Error("Expected an error for an invalid mood value")
@@ -41,7 +35,7 @@ func TestNewMoodEntryWithMoodValueAboveRange(t *testing.T) {
 }
 
 func TestNewMoodEntryWithMoodValueBelowRange(t *testing.T) {
-	_, err := NewMoodEntry(0, "2022/12/13", "Test")
+	_, err := NewMoodEntry(0, time.Now(), "Test")
 
 	if err == nil {
 		t.Error("Expected an error for an invalid mood value")

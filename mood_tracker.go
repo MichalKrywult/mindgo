@@ -25,6 +25,7 @@ func (tracker MoodTracker) GetEntries() []MoodEntry {
 	return entries
 }
 
+/* right now this function is useless
 func (tracker MoodTracker) findEntryByID(id int) (MoodEntry, error) {
 	//without pointer receiver (*) because this method doesn't modify the tracker
 	for _, entry := range tracker.entries {
@@ -33,7 +34,7 @@ func (tracker MoodTracker) findEntryByID(id int) (MoodEntry, error) {
 		}
 	}
 	return MoodEntry{}, fmt.Errorf("ID %d doesn't exist", id)
-}
+}*/
 
 func (tracker MoodTracker) findIndexByID(id int) (int, error) {
 	//again, without pointer receiver (*) because this method doesn't modify the tracker

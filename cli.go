@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var scanner = bufio.NewScanner(os.Stdin)
@@ -55,7 +56,14 @@ func displayAllEntries(tracker MoodTracker) error {
 
 	fmt.Print("All of your entries:\n")
 	for i := range entries {
-		fmt.Printf("%d. %v | %v | %v\n", i+1, entries[i].Mood, entries[i].Date, entries[i].Note)
+		fmt.Printf(
+			"%d. %d | %s | %s\n",
+			i+1,
+			entries[i].Mood,
+			entries[i].Date.Format("2006-01-02 15:04"),
+			entries[i].Note,
+		)
+
 	}
 	return nil
 }
@@ -77,19 +85,13 @@ func readNewMoodEntry() (MoodEntry, error) {
 		return MoodEntry{}, err
 	}
 
-	fmt.Print("Date: ")
-	date, err := readLine()
-	if err != nil {
-		return MoodEntry{}, err
-	}
-
 	fmt.Print("Note: ")
 	note, err := readLine()
 	if err != nil {
 		return MoodEntry{}, err
 	}
 
-	return NewMoodEntry(mood, date, note)
+	return NewMoodEntry(mood, time.Now(), note)
 }
 
 func (tracker MoodTracker) getEntryID(index int) (int, error) {
@@ -142,7 +144,11 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 				continue
 			}
 
-			tracker.EditEntryByID(entryID, entry)
+			err = tracker.EditEntryByID(entryID, entry)
+			if err != nil {
+				fmt.Println("Something went wrong:", err)
+				continue
+			}
 
 		case 3:
 			fmt.Println("Which entry would you like to delete?")
