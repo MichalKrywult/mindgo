@@ -142,7 +142,11 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 				continue
 			}
 
-			tracker.EditEntryByID(entryID, entry)
+			err = tracker.EditEntryByID(entryID, entry)
+			if err != nil {
+				fmt.Println("Something went wrong:", err)
+				continue
+			}
 
 		case 3:
 			fmt.Println("Which entry would you like to delete?")

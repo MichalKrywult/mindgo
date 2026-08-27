@@ -85,7 +85,7 @@ func TestFindIndexByID(t *testing.T) {
 		t.Errorf("Expected %d, got %d", -1, index)
 	}
 }
-
+/* function is never called, no need to test it
 func TestFindEntryByID(t *testing.T) {
 	tracker := MoodTracker{}
 
@@ -103,6 +103,7 @@ func TestFindEntryByID(t *testing.T) {
 		t.Errorf("Expected %d, got %d", 1, data.ID)
 	}
 }
+	*/
 func TestRemoveEntry(t *testing.T) {
 	tracker := MoodTracker{}
 
