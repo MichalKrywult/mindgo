@@ -3,15 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
-var scanner = bufio.NewScanner(os.Stdin)
-
-func readLine() (string, error) {
+func readLine(scanner *bufio.Scanner) (string, error) {
 	if !scanner.Scan() {
 		return "", scanner.Err()
 	}
@@ -19,8 +16,8 @@ func readLine() (string, error) {
 	return strings.TrimSpace(scanner.Text()), nil
 }
 
-func readInt() (int, error) {
-	text, err := readLine()
+func readInt(scanner *bufio.Scanner) (int, error) {
+	text, err := readLine(scanner)
 	if err != nil {
 		return 0, err
 	}
@@ -28,7 +25,7 @@ func readInt() (int, error) {
 	return strconv.Atoi(text)
 }
 
-func displayMenuAndReadChoice() int {
+func displayMenuAndReadChoice(scanner *bufio.Scanner) int {
 	fmt.Println("=====MENU=====")
 	fmt.Println("1. New entry")
 	fmt.Println("2. Edit entry")
@@ -38,7 +35,7 @@ func displayMenuAndReadChoice() int {
 	fmt.Println("0. Exit")
 
 	fmt.Print("Your choice: ")
-	choice, err := readInt()
+	choice, err := readInt(scanner)
 	if err != nil {
 		return -1
 	}
@@ -78,15 +75,15 @@ func displayAverageMood(tracker MoodTracker) {
 	fmt.Printf("Your average mood: %v\n", average)
 }
 
-func readNewMoodEntry() (MoodEntry, error) {
+func readNewMoodEntry(scanner *bufio.Scanner) (MoodEntry, error) {
 	fmt.Print("Mood score (1-10): ")
-	mood, err := readInt()
+	mood, err := readInt(scanner)
 	if err != nil {
 		return MoodEntry{}, err
 	}
 
 	fmt.Print("Note: ")
-	note, err := readLine()
+	note, err := readLine(scanner)
 	if err != nil {
 		return MoodEntry{}, err
 	}
@@ -102,13 +99,13 @@ func (tracker MoodTracker) getEntryID(index int) (int, error) {
 	return tracker.entries[index].ID, nil
 }
 
-func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer to a MoodTracker type
+func showCLI(tracker *MoodTracker, scanner *bufio.Scanner) { // *MoodTracker means tracker is a pointer to a MoodTracker type
 
 	for {
-		choice := displayMenuAndReadChoice()
+		choice := displayMenuAndReadChoice(scanner)
 		switch choice {
 		case 1:
-			entry, err := readNewMoodEntry()
+			entry, err := readNewMoodEntry(scanner)
 			if err != nil {
 				fmt.Println("Something went wrong:", err)
 				continue
@@ -126,7 +123,7 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 			}
 
 			fmt.Println("Number of entry to edit:")
-			choice, err := readInt()
+			choice, err := readInt(scanner)
 			if err != nil {
 				fmt.Println("Invalid entry")
 				continue
@@ -138,7 +135,7 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 				continue
 			}
 
-			entry, err := readNewMoodEntry()
+			entry, err := readNewMoodEntry(scanner)
 			if err != nil {
 				fmt.Println("Something went wrong:", err)
 				continue
@@ -159,7 +156,7 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 			}
 
 			fmt.Println("Number of entry to delete:")
-			choice, err := readInt()
+			choice, err := readInt(scanner)
 			if err != nil {
 				fmt.Println("Invalid entry")
 				continue
