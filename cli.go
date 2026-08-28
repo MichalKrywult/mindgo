@@ -21,16 +21,16 @@ func NewCLI(tracker *MoodTracker) *CLI {
 	}
 }
 
-func readLine(scanner *bufio.Scanner) (string, error) {
-	if !scanner.Scan() {
-		return "", scanner.Err()
+func (cli *CLI) readLine() (string, error) {
+	if !cli.scanner.Scan() {
+		return "", cli.scanner.Err()
 	}
 
-	return strings.TrimSpace(scanner.Text()), nil
+	return strings.TrimSpace(cli.scanner.Text()), nil
 }
 
-func readInt(scanner *bufio.Scanner) (int, error) {
-	text, err := readLine(scanner)
+func (cli *CLI) readInt() (int, error) {
+	text, err := cli.readLine()
 	if err != nil {
 		return 0, err
 	}
@@ -38,7 +38,7 @@ func readInt(scanner *bufio.Scanner) (int, error) {
 	return strconv.Atoi(text)
 }
 
-func displayMenuAndReadChoice(scanner *bufio.Scanner) int {
+func (cli *CLI) displayMenuAndReadChoice() int {
 	fmt.Println("=====MENU=====")
 	fmt.Println("1. New entry")
 	fmt.Println("2. Edit entry")
@@ -48,7 +48,7 @@ func displayMenuAndReadChoice(scanner *bufio.Scanner) int {
 	fmt.Println("0. Exit")
 
 	fmt.Print("Your choice: ")
-	choice, err := readInt(scanner)
+	choice, err := cli.readInt()
 	if err != nil {
 		return -1
 	}
@@ -88,15 +88,17 @@ func displayAverageMood(tracker MoodTracker) {
 	fmt.Printf("Your average mood: %v\n", average)
 }
 
-func readNewMoodEntry(scanner *bufio.Scanner) (MoodEntry, error) {
+func (cli *CLI) readNewMoodEntry() (MoodEntry, error) {
 	fmt.Print("Mood score (1-10): ")
-	mood, err := readInt(scanner)
+
+	mood, err := cli.readInt()
 	if err != nil {
 		return MoodEntry{}, err
 	}
 
 	fmt.Print("Note: ")
-	note, err := readLine(scanner)
+
+	note, err := cli.readLine()
 	if err != nil {
 		return MoodEntry{}, err
 	}
@@ -114,10 +116,11 @@ func (tracker MoodTracker) getEntryID(index int) (int, error) {
 
 func (cli *CLI) show() {
 	for {
-		choice := displayMenuAndReadChoice(cli.scanner)
+		choice := cli.displayMenuAndReadChoice()
+
 		switch choice {
 		case 1:
-			entry, err := readNewMoodEntry(cli.scanner)
+			entry, err := cli.readNewMoodEntry()
 			if err != nil {
 				fmt.Println("Something went wrong:", err)
 				continue
@@ -135,7 +138,7 @@ func (cli *CLI) show() {
 			}
 
 			fmt.Println("Number of entry to edit:")
-			choice, err := readInt(cli.scanner)
+			choice, err := cli.readInt()
 			if err != nil {
 				fmt.Println("Invalid entry")
 				continue
@@ -147,7 +150,7 @@ func (cli *CLI) show() {
 				continue
 			}
 
-			entry, err := readNewMoodEntry(cli.scanner)
+			entry, err := cli.readNewMoodEntry()
 			if err != nil {
 				fmt.Println("Something went wrong:", err)
 				continue
@@ -168,7 +171,7 @@ func (cli *CLI) show() {
 			}
 
 			fmt.Println("Number of entry to delete:")
-			choice, err := readInt(cli.scanner)
+			choice, err := cli.readInt()
 			if err != nil {
 				fmt.Println("Invalid entry")
 				continue
