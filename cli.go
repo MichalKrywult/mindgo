@@ -106,14 +106,6 @@ func (cli *CLI) readNewMoodEntry() (MoodEntry, error) {
 	return NewMoodEntry(mood, time.Now(), note)
 }
 
-func (tracker MoodTracker) getEntryID(index int) (int, error) {
-	if index < 0 || index >= len(tracker.entries) {
-		return 0, fmt.Errorf("invalid entry index")
-	}
-
-	return tracker.entries[index].ID, nil
-}
-
 func (cli *CLI) show() {
 	for {
 		choice := cli.displayMenuAndReadChoice()
@@ -143,12 +135,15 @@ func (cli *CLI) show() {
 				fmt.Println("Invalid entry")
 				continue
 			}
+			index := choice - 1
 
-			entryID, err := cli.tracker.getEntryID(choice - 1)
-			if err != nil {
+			entries := cli.tracker.GetEntries()
+
+			if index < 0 || index >= len(entries) {
 				fmt.Println("Invalid entry number")
 				continue
 			}
+			entryID := entries[index].ID
 
 			entry, err := cli.readNewMoodEntry()
 			if err != nil {
@@ -176,12 +171,15 @@ func (cli *CLI) show() {
 				fmt.Println("Invalid entry")
 				continue
 			}
+			index := choice - 1
 
-			entryID, err := cli.tracker.getEntryID(choice - 1)
-			if err != nil {
+			entries := cli.tracker.GetEntries()
+
+			if index < 0 || index >= len(entries) {
 				fmt.Println("Invalid entry number")
 				continue
 			}
+			entryID := entries[index].ID
 
 			err = cli.tracker.RemoveEntryByID(entryID)
 			if err != nil {
