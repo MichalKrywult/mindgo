@@ -1,13 +1,8 @@
 package main
 
-import (
-	"bufio"
-	"os"
-)
-
 func main() {
 	tracker := MoodTracker{}
-	scanner := bufio.NewScanner(os.Stdin)
+	cli := NewCLI(&tracker)
 
-	showCLI(&tracker, scanner) // we have to use &, so CLI function will operate on the same MoodTracker object - not a copy of it
+	cli.show() // we have to use &, so CLI function will operate on the same MoodTracker object - not a copy of it
 }
