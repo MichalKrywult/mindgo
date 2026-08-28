@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
+	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -14,10 +14,10 @@ type CLI struct {
 	scanner *bufio.Scanner
 }
 
-func NewCLI(tracker *MoodTracker) *CLI {
-	return &CLI{ // create a CLI object and return a pointer to it
+func NewCLI(tracker *MoodTracker, input io.Reader) *CLI {
+	return &CLI{
 		tracker: tracker,
-		scanner: bufio.NewScanner(os.Stdin),
+		scanner: bufio.NewScanner(input),
 	}
 }
 
