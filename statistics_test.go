@@ -17,11 +17,11 @@ func TestCalculateAverageMood(t *testing.T) {
 
 	average, err := tracker.CalculateAverageMood()
 	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
+		t.Errorf("unexpected error: %v", err)
 	}
 
 	if average != 3 {
-		t.Errorf("Calculated average is wrong, expected: %v, got: %v", 3, average)
+		t.Errorf("calculated average is wrong, expected: %v, got: %v", 3, average)
 	}
 }
 
@@ -31,6 +31,6 @@ func TestCalculateAverageMoodWhenEmpty(t *testing.T) {
 	_, err := tracker.CalculateAverageMood()
 
 	if err == nil {
-		t.Error("Expected an error for trying to calculate average on empty tracker ")
+		t.Error("expected an error for trying to calculate average on empty tracker ")
 	}
 }
