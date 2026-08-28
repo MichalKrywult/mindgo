@@ -18,7 +18,7 @@ func TestNewMoodEntryWithCorrectData(t *testing.T) {
 	}
 
 	if entry.Date != time {
-		t.Errorf("Date = %q, expected %q", entry.Date, "2022/12/13")
+		t.Errorf("Date = %q, expected %q", entry.Date, time)
 	}
 
 	if entry.Note != "Test" {
@@ -30,7 +30,7 @@ func TestNewMoodEntryWithMoodValueAboveRange(t *testing.T) {
 	_, err := NewMoodEntry(12, time.Now(), "Test")
 
 	if err == nil {
-		t.Error("Expected an error for an invalid mood value")
+		t.Error("expected an error for an invalid mood value")
 	}
 }
 
@@ -38,6 +38,6 @@ func TestNewMoodEntryWithMoodValueBelowRange(t *testing.T) {
 	_, err := NewMoodEntry(0, time.Now(), "Test")
 
 	if err == nil {
-		t.Error("Expected an error for an invalid mood value")
+		t.Error("expected an error for an invalid mood value")
 	}
 }

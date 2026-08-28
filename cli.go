@@ -3,24 +3,34 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"os"
+	"io"
 	"strconv"
 	"strings"
 	"time"
 )
 
-var scanner = bufio.NewScanner(os.Stdin)
-
-func readLine() (string, error) {
-	if !scanner.Scan() {
-		return "", scanner.Err()
-	}
-
-	return strings.TrimSpace(scanner.Text()), nil
+type CLI struct {
+	tracker *MoodTracker
+	scanner *bufio.Scanner
 }
 
-func readInt() (int, error) {
-	text, err := readLine()
+func NewCLI(tracker *MoodTracker, input io.Reader) *CLI {
+	return &CLI{
+		tracker: tracker,
+		scanner: bufio.NewScanner(input),
+	}
+}
+
+func (cli *CLI) readLine() (string, error) {
+	if !cli.scanner.Scan() {
+		return "", cli.scanner.Err()
+	}
+
+	return strings.TrimSpace(cli.scanner.Text()), nil
+}
+
+func (cli *CLI) readInt() (int, error) {
+	text, err := cli.readLine()
 	if err != nil {
 		return 0, err
 	}
@@ -28,7 +38,7 @@ func readInt() (int, error) {
 	return strconv.Atoi(text)
 }
 
-func displayMenuAndReadChoice() int {
+func (cli *CLI) displayMenuAndReadChoice() int {
 	fmt.Println("=====MENU=====")
 	fmt.Println("1. New entry")
 	fmt.Println("2. Edit entry")
@@ -38,7 +48,7 @@ func displayMenuAndReadChoice() int {
 	fmt.Println("0. Exit")
 
 	fmt.Print("Your choice: ")
-	choice, err := readInt()
+	choice, err := cli.readInt()
 	if err != nil {
 		return -1
 	}
@@ -78,15 +88,17 @@ func displayAverageMood(tracker MoodTracker) {
 	fmt.Printf("Your average mood: %v\n", average)
 }
 
-func readNewMoodEntry() (MoodEntry, error) {
+func (cli *CLI) readNewMoodEntry() (MoodEntry, error) {
 	fmt.Print("Mood score (1-10): ")
-	mood, err := readInt()
+
+	mood, err := cli.readInt()
 	if err != nil {
 		return MoodEntry{}, err
 	}
 
 	fmt.Print("Note: ")
-	note, err := readLine()
+
+	note, err := cli.readLine()
 	if err != nil {
 		return MoodEntry{}, err
 	}
@@ -102,49 +114,49 @@ func (tracker MoodTracker) getEntryID(index int) (int, error) {
 	return tracker.entries[index].ID, nil
 }
 
-func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer to a MoodTracker type
-
+func (cli *CLI) show() {
 	for {
-		choice := displayMenuAndReadChoice()
+		choice := cli.displayMenuAndReadChoice()
+
 		switch choice {
 		case 1:
-			entry, err := readNewMoodEntry()
+			entry, err := cli.readNewMoodEntry()
 			if err != nil {
 				fmt.Println("Something went wrong:", err)
 				continue
 			}
 
-			tracker.AddEntry(entry)
+			cli.tracker.AddEntry(entry)
 			fmt.Println("Entry added!")
 
 		case 2:
 			fmt.Println("Which entry would you like to edit?")
-			err := displayAllEntries(*tracker)
+			err := displayAllEntries(*cli.tracker)
 			if err != nil {
 				fmt.Print(err)
 				continue
 			}
 
 			fmt.Println("Number of entry to edit:")
-			choice, err := readInt()
+			choice, err := cli.readInt()
 			if err != nil {
 				fmt.Println("Invalid entry")
 				continue
 			}
 
-			entryID, err := tracker.getEntryID(choice - 1)
+			entryID, err := cli.tracker.getEntryID(choice - 1)
 			if err != nil {
 				fmt.Println("Invalid entry number")
 				continue
 			}
 
-			entry, err := readNewMoodEntry()
+			entry, err := cli.readNewMoodEntry()
 			if err != nil {
 				fmt.Println("Something went wrong:", err)
 				continue
 			}
 
-			err = tracker.EditEntryByID(entryID, entry)
+			err = cli.tracker.EditEntryByID(entryID, entry)
 			if err != nil {
 				fmt.Println("Something went wrong:", err)
 				continue
@@ -152,26 +164,26 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 
 		case 3:
 			fmt.Println("Which entry would you like to delete?")
-			err := displayAllEntries(*tracker)
+			err := displayAllEntries(*cli.tracker)
 			if err != nil {
 				fmt.Print(err)
 				continue
 			}
 
 			fmt.Println("Number of entry to delete:")
-			choice, err := readInt()
+			choice, err := cli.readInt()
 			if err != nil {
 				fmt.Println("Invalid entry")
 				continue
 			}
 
-			entryID, err := tracker.getEntryID(choice - 1)
+			entryID, err := cli.tracker.getEntryID(choice - 1)
 			if err != nil {
 				fmt.Println("Invalid entry number")
 				continue
 			}
 
-			err = tracker.RemoveEntryByID(entryID)
+			err = cli.tracker.RemoveEntryByID(entryID)
 			if err != nil {
 				fmt.Println("Unexpected error:", err)
 				continue
@@ -180,7 +192,7 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 			fmt.Println("Entry removed successfully")
 
 		case 4:
-			err := displayAllEntries(*tracker) // passing a copy of a tracker to the function
+			err := displayAllEntries(*cli.tracker) // passing a copy of the MoodTracker to the function
 
 			if err != nil {
 				fmt.Print(err)
@@ -188,7 +200,7 @@ func showCLI(tracker *MoodTracker) { // *MoodTracker means tracker is a pointer 
 			}
 
 		case 5:
-			displayAverageMood(*tracker)
+			displayAverageMood(*cli.tracker)
 
 		case 0:
 			fmt.Println("Exit")

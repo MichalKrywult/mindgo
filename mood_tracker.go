@@ -8,14 +8,12 @@ type MoodTracker struct {
 }
 
 func (tracker *MoodTracker) AddEntry(entry MoodEntry) {
-	// pointer receiver (*) because this method modifies the tracker
 	tracker.entryID++
 	entry.ID = tracker.entryID
 	tracker.entries = append(tracker.entries, entry)
 }
 
-func (tracker MoodTracker) GetEntries() []MoodEntry {
-	//without pointer receiver (*) because this method doesn't modify the tracker
+func (tracker *MoodTracker) GetEntries() []MoodEntry {
 	entries := make([]MoodEntry, len(tracker.entries))
 	//we have to create space for that copy with make()
 	// copy() doesn't make a slice bigger
@@ -26,8 +24,7 @@ func (tracker MoodTracker) GetEntries() []MoodEntry {
 }
 
 /* right now this function is useless
-func (tracker MoodTracker) findEntryByID(id int) (MoodEntry, error) {
-	//without pointer receiver (*) because this method doesn't modify the tracker
+func (tracker *MoodTracker) findEntryByID(id int) (MoodEntry, error) {
 	for _, entry := range tracker.entries {
 		if entry.ID == id {
 			return entry, nil
@@ -36,7 +33,7 @@ func (tracker MoodTracker) findEntryByID(id int) (MoodEntry, error) {
 	return MoodEntry{}, fmt.Errorf("ID %d doesn't exist", id)
 }*/
 
-func (tracker MoodTracker) findIndexByID(id int) (int, error) {
+func (tracker *MoodTracker) findIndexByID(id int) (int, error) {
 	//again, without pointer receiver (*) because this method doesn't modify the tracker
 	for index, entry := range tracker.entries {
 		if entry.ID == id {
@@ -47,7 +44,6 @@ func (tracker MoodTracker) findIndexByID(id int) (int, error) {
 }
 
 func (tracker *MoodTracker) RemoveEntryByID(id int) error {
-	// pointer receiver (*) because this method modifies the tracker
 	index, err := tracker.findIndexByID(id)
 	if err != nil {
 		return err
@@ -60,7 +56,6 @@ func (tracker *MoodTracker) RemoveEntryByID(id int) error {
 }
 
 func (tracker *MoodTracker) EditEntryByID(id int, entry MoodEntry) error {
-	// pointer receiver (*) because this method modifies the tracker
 	index, err := tracker.findIndexByID(id)
 	if err != nil {
 		return err
