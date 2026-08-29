@@ -73,7 +73,6 @@ func displayAllEntries(tracker MoodTracker) error {
 			entries[i].Date.Format("2006-01-02 15:04"),
 			entries[i].Note,
 		)
-
 	}
 	return nil
 }
