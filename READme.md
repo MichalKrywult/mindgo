@@ -11,6 +11,7 @@ The project is created primarily for learning Go through building a real-life ap
 - Basic statistics
 - Persistent storage
 - CLI interface
+- Saving data to JSON file
 
 ## Development
 
