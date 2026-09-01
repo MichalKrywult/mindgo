@@ -117,7 +117,11 @@ func (cli *CLI) show() {
 				continue
 			}
 
-			cli.tracker.AddEntry(entry)
+			err = cli.tracker.AddEntry(entry)
+			if err != nil {
+				fmt.Println("Unexpected error occured:", err)
+				continue
+			}
 			fmt.Println("Entry added!")
 
 		case 2:
