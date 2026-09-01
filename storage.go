@@ -13,11 +13,14 @@ type MockStorage struct {
 
 func (m *MockStorage) Save(entries []MoodEntry) error {
 	m.entries = entries
-	return nil 
+	return nil
 }
 
 func (m *MockStorage) Load() ([]MoodEntry, error) {
-	return m.entries, nil
+	entries := make([]MoodEntry, len(m.entries))
+	copy(entries, m.entries)
+
+	return entries, nil
 }
 
 type Storage interface {
