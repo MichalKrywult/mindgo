@@ -5,7 +5,7 @@ import "fmt"
 func (tracker MoodTracker) CalculateAverageMood() (float64, error) {
 
 	if len(tracker.entries) == 0 {
-		return 0, fmt.Errorf("Calculating average is not possible when tracker is empty")
+		return 0, fmt.Errorf("calculating average is not possible when tracker is empty")
 	}
 
 	average := 0.0
