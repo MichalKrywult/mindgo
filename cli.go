@@ -56,15 +56,19 @@ func (cli *CLI) displayMenuAndReadChoice() int {
 	return choice
 }
 
-func displayAllEntries(tracker MoodTracker) error {
+func (cli *CLI) hasEntries() bool {
+	return len(cli.tracker.GetEntries()) > 0
+}
 
-	entries := tracker.GetEntries()
+func (cli *CLI) displayAllEntries() {
+	entries := cli.tracker.GetEntries()
 
 	if len(entries) == 0 {
-		return fmt.Errorf("You don't have any entries\n")
+		fmt.Println("You don't have any entries")
+		return
 	}
 
-	fmt.Print("All of your entries:\n")
+	fmt.Println("All of your entries:")
 	for i := range entries {
 		fmt.Printf(
 			"%d. %d | %s | %s\n",
@@ -74,13 +78,12 @@ func displayAllEntries(tracker MoodTracker) error {
 			entries[i].Note,
 		)
 	}
-	return nil
 }
 
-func displayAverageMood(tracker MoodTracker) {
-	average, err := tracker.CalculateAverageMood()
+func (cli *CLI) displayAverageMood() {
+	average, err := cli.tracker.CalculateAverageMood()
 	if err != nil {
-		fmt.Print("You don't have any entries\n")
+		fmt.Println("You don't have any entries")
 		return
 	}
 
@@ -125,12 +128,13 @@ func (cli *CLI) show() {
 			fmt.Println("Entry added!")
 
 		case 2:
-			fmt.Println("Which entry would you like to edit?")
-			err := displayAllEntries(*cli.tracker)
-			if err != nil {
-				fmt.Print(err)
+			if !cli.hasEntries() {
+				fmt.Println("You don't have any entries")
 				continue
 			}
+
+			fmt.Println("Which entry would you like to edit?")
+			cli.displayAllEntries()
 
 			fmt.Println("Number of entry to edit:")
 			choice, err := cli.readInt()
@@ -161,12 +165,13 @@ func (cli *CLI) show() {
 			}
 
 		case 3:
-			fmt.Println("Which entry would you like to delete?")
-			err := displayAllEntries(*cli.tracker)
-			if err != nil {
-				fmt.Print(err)
+			if !cli.hasEntries() {
+				fmt.Println("You don't have any entries")
 				continue
 			}
+
+			fmt.Println("Which entry would you like to delete?")
+			cli.displayAllEntries()
 
 			fmt.Println("Number of entry to delete:")
 			choice, err := cli.readInt()
@@ -193,15 +198,10 @@ func (cli *CLI) show() {
 			fmt.Println("Entry removed successfully")
 
 		case 4:
-			err := displayAllEntries(*cli.tracker) // passing a copy of the MoodTracker to the function
-
-			if err != nil {
-				fmt.Print(err)
-				continue
-			}
+			cli.displayAllEntries()
 
 		case 5:
-			displayAverageMood(*cli.tracker)
+			cli.displayAverageMood()
 
 		case 0:
 			fmt.Println("Exit")
