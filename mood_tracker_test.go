@@ -6,7 +6,7 @@ import (
 )
 
 func TestAddEntry(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -36,7 +36,7 @@ func TestAddEntry(t *testing.T) {
 }
 
 func TestGetEntries(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -68,7 +68,7 @@ func TestGetEntries(t *testing.T) {
 }
 
 func TestFindIndexByID(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -113,7 +113,7 @@ func TestFindIndexByID(t *testing.T) {
 }
 
 func TestRemoveEntry(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -148,7 +148,7 @@ func TestRemoveEntry(t *testing.T) {
 }
 
 func TestRemoveEntryWithInvalidID(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -170,7 +170,7 @@ func TestRemoveEntryWithInvalidID(t *testing.T) {
 }
 
 func TestEditEntryByID(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -206,7 +206,7 @@ func TestEditEntryByID(t *testing.T) {
 }
 
 func TestEditEntryByIDWithInvalidID(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}

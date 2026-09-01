@@ -6,14 +6,18 @@ import (
 )
 
 // MockStorage pretends to be real storage for tests
-type MockStorage struct{}
-
-func (m MockStorage) Save(entries []MoodEntry) error {
-	return nil // we pretend the data was saved
+// it remembers last state of storage
+type MockStorage struct {
+	entries []MoodEntry
 }
 
-func (m MockStorage) Load() ([]MoodEntry, error) {
-	return nil, nil // same thing, we pretend everytinh is ok
+func (m *MockStorage) Save(entries []MoodEntry) error {
+	m.entries = entries
+	return nil 
+}
+
+func (m *MockStorage) Load() ([]MoodEntry, error) {
+	return m.entries, nil
 }
 
 type Storage interface {
