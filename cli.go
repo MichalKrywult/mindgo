@@ -73,7 +73,6 @@ func displayAllEntries(tracker MoodTracker) error {
 			entries[i].Date.Format("2006-01-02 15:04"),
 			entries[i].Note,
 		)
-
 	}
 	return nil
 }
@@ -118,7 +117,11 @@ func (cli *CLI) show() {
 				continue
 			}
 
-			cli.tracker.AddEntry(entry)
+			err = cli.tracker.AddEntry(entry)
+			if err != nil {
+				fmt.Println("Unexpected error occured:", err)
+				continue
+			}
 			fmt.Println("Entry added!")
 
 		case 2:

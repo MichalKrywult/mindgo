@@ -6,7 +6,10 @@ import (
 )
 
 func TestCalculateAverageMood(t *testing.T) {
-	tracker := MoodTracker{}
+	tracker, err := NewMoodTracker(MockStorage{})
+	if err != nil {
+		t.Fatalf("failed to create tracker: %v", err)
+	}
 
 	entry1 := MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
 	time.Sleep(100 * time.Millisecond)
@@ -26,9 +29,12 @@ func TestCalculateAverageMood(t *testing.T) {
 }
 
 func TestCalculateAverageMoodWhenEmpty(t *testing.T) {
-	tracker := MoodTracker{}
+	tracker, err := NewMoodTracker(MockStorage{})
+	if err != nil {
+		t.Fatalf("failed to create tracker: %v", err)
+	}
 
-	_, err := tracker.CalculateAverageMood()
+	_, err = tracker.CalculateAverageMood()
 
 	if err == nil {
 		t.Error("expected an error for trying to calculate average on empty tracker ")

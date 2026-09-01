@@ -1,16 +1,47 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type MoodTracker struct {
 	entries []MoodEntry
 	entryID int
+	storage Storage
 }
 
-func (tracker *MoodTracker) AddEntry(entry MoodEntry) {
+func NewMoodTracker(storage Storage) (*MoodTracker, error) {
+	// read data from the file
+	entries, err := storage.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	// search for max id in data that is being loaded
+	maxID := 0
+	for _, e := range entries {
+		if e.ID > maxID {
+			maxID = e.ID
+		}
+	}
+
+	// return pointer to the created struct
+	return &MoodTracker{
+		entries: entries,
+		entryID: maxID,
+		storage: storage,
+	}, nil
+}
+
+func (tracker *MoodTracker) AddEntry(entry MoodEntry) error {
 	tracker.entryID++
 	entry.ID = tracker.entryID
 	tracker.entries = append(tracker.entries, entry)
+	err := tracker.storage.Save(tracker.entries)
+	if err != nil {
+		return fmt.Errorf("unexpected error occurred when saving to file: %w", err)
+	}
+	return nil
 }
 
 func (tracker *MoodTracker) GetEntries() []MoodEntry {
