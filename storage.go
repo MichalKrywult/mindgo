@@ -15,7 +15,9 @@ type FileStorage struct {
 }
 
 func (fs FileStorage) Save(entries []MoodEntry) error {
-	data, err := json.Marshal(entries)
+	// data, err := json.Marshal(entries) would write everything in one line
+	// while technically correct, it's unreadable
+	data, err := json.MarshalIndent(entries, "", "  ") // writes data readable to humans
 	if err != nil {
 		return err
 	}
@@ -31,6 +33,9 @@ func (fs FileStorage) Save(entries []MoodEntry) error {
 func (fs FileStorage) Load() ([]MoodEntry, error) {
 	data, err := os.ReadFile(fs.filename)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return []MoodEntry{}, nil
+		}
 		return nil, err
 	}
 
