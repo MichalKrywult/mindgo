@@ -4,6 +4,13 @@ import (
 	"fmt"
 )
 
+func (tracker *MoodTracker) save() error {
+	if err := tracker.storage.Save(tracker.entries); err != nil {
+		return fmt.Errorf("unexpected error occurred when saving to file: %w", err)
+	}
+	return nil
+}
+
 type MoodTracker struct {
 	entries []MoodEntry
 	entryID int
@@ -37,9 +44,9 @@ func (tracker *MoodTracker) AddEntry(entry MoodEntry) error {
 	tracker.entryID++
 	entry.ID = tracker.entryID
 	tracker.entries = append(tracker.entries, entry)
-	err := tracker.storage.Save(tracker.entries)
+	err := tracker.save()
 	if err != nil {
-		return fmt.Errorf("unexpected error occurred when saving to file: %w", err)
+		return err
 	}
 	return nil
 }
@@ -83,6 +90,10 @@ func (tracker *MoodTracker) RemoveEntryByID(id int) error {
 	tracker.entries = append(tracker.entries[:index], tracker.entries[index+1:]...)
 	// append(slice, element)
 	// ... separates slice into separate arguments
+	err = tracker.save()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -95,5 +106,9 @@ func (tracker *MoodTracker) EditEntryByID(id int, entry MoodEntry) error {
 	entry.ID = id
 	tracker.entries[index] = entry
 
+	err = tracker.save()
+	if err != nil {
+		return err
+	}
 	return nil
 }
