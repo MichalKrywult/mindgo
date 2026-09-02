@@ -120,7 +120,7 @@ func (cli *CLI) show() {
 				continue
 			}
 
-			err = cli.tracker.AddEntry(entry)
+			err = cli.tracker.addEntry(entry)
 			if err != nil {
 				fmt.Println("Unexpected error occured:", err)
 				continue
@@ -158,7 +158,7 @@ func (cli *CLI) show() {
 				continue
 			}
 
-			err = cli.tracker.EditEntryByID(entryID, entry)
+			err = cli.tracker.editEntryByID(entryID, entry)
 			if err != nil {
 				fmt.Println("Something went wrong:", err)
 				continue
@@ -189,7 +189,7 @@ func (cli *CLI) show() {
 			}
 			entryID := entries[index].ID
 
-			err = cli.tracker.RemoveEntryByID(entryID)
+			err = cli.tracker.removeEntryByID(entryID)
 			if err != nil {
 				fmt.Println("Unexpected error:", err)
 				continue
