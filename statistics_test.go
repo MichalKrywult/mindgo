@@ -15,12 +15,12 @@ func TestCalculateAverageMood(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	entry2 := MoodEntry{Mood: 4, Date: time.Now(), Note: "Test"}
 
-	err = tracker.AddEntry(entry1)
+	err = tracker.addEntry(entry1)
 	if err != nil {
 		t.Fatalf("failed to add entry: %v", err)
 	}
 
-	err = tracker.AddEntry(entry2)
+	err = tracker.addEntry(entry2)
 	if err != nil {
 		t.Fatalf("failed to add entry: %v", err)
 	}

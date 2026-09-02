@@ -112,3 +112,33 @@ func (tracker *MoodTracker) editEntryByID(id int, entry MoodEntry) error {
 	}
 	return nil
 }
+
+func (tracker *MoodTracker) EditEntryByIndex(index int, entry MoodEntry) error {
+	if index < 0 || index >= len(tracker.entries) {
+		return fmt.Errorf("Invalid entry number")
+	}
+
+	id := tracker.entries[index].ID
+
+	err := tracker.editEntryByID(id, entry)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (tracker *MoodTracker) RemoveEntryByIndex(index int) error {
+	if index < 0 || index >= len(tracker.entries) {
+		return fmt.Errorf("Invalid entry number")
+	}
+
+	id := tracker.entries[index].ID
+
+	err := tracker.removeEntryByID(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
