@@ -144,23 +144,15 @@ func (cli *CLI) show() {
 			}
 			index := choice - 1
 
-			entries := cli.tracker.GetEntries()
-
-			if index < 0 || index >= len(entries) {
-				fmt.Println("Invalid entry number")
-				continue
-			}
-			entryID := entries[index].ID
-
 			entry, err := cli.readNewMoodEntry()
 			if err != nil {
-				fmt.Println("Something went wrong:", err)
+				fmt.Printf("Something went wrong with adding new entry: %v", err)
 				continue
 			}
 
-			err = cli.tracker.editEntryByID(entryID, entry)
+			err = cli.tracker.EditEntryByIndex(index, entry)
 			if err != nil {
-				fmt.Println("Something went wrong:", err)
+				fmt.Printf("Something went wrong with editing entry: %v", err)
 				continue
 			}
 
@@ -181,21 +173,11 @@ func (cli *CLI) show() {
 			}
 			index := choice - 1
 
-			entries := cli.tracker.GetEntries()
-
-			if index < 0 || index >= len(entries) {
-				fmt.Println("Invalid entry number")
-				continue
-			}
-			entryID := entries[index].ID
-
-			err = cli.tracker.removeEntryByID(entryID)
+			err = cli.tracker.RemoveEntryByIndex(index)
 			if err != nil {
-				fmt.Println("Unexpected error:", err)
+				fmt.Println("Something went wrong with removing entry:", err)
 				continue
 			}
-
-			fmt.Println("Entry removed successfully")
 
 		case 4:
 			cli.displayAllEntries()
