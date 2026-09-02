@@ -40,7 +40,7 @@ func NewMoodTracker(storage Storage) (*MoodTracker, error) {
 	}, nil
 }
 
-func (tracker *MoodTracker) AddEntry(entry MoodEntry) error {
+func (tracker *MoodTracker) addEntry(entry MoodEntry) error {
 	tracker.entryID++
 	entry.ID = tracker.entryID
 	tracker.entries = append(tracker.entries, entry)
@@ -81,7 +81,7 @@ func (tracker *MoodTracker) findIndexByID(id int) (int, error) {
 	return -1, fmt.Errorf("ID %d doesn't exist", id)
 }
 
-func (tracker *MoodTracker) RemoveEntryByID(id int) error {
+func (tracker *MoodTracker) removeEntryByID(id int) error {
 	index, err := tracker.findIndexByID(id)
 	if err != nil {
 		return err
@@ -97,7 +97,7 @@ func (tracker *MoodTracker) RemoveEntryByID(id int) error {
 	return nil
 }
 
-func (tracker *MoodTracker) EditEntryByID(id int, entry MoodEntry) error {
+func (tracker *MoodTracker) editEntryByID(id int, entry MoodEntry) error {
 	index, err := tracker.findIndexByID(id)
 	if err != nil {
 		return err
@@ -110,5 +110,35 @@ func (tracker *MoodTracker) EditEntryByID(id int, entry MoodEntry) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (tracker *MoodTracker) EditEntryByIndex(index int, entry MoodEntry) error {
+	if index < 0 || index >= len(tracker.entries) {
+		return fmt.Errorf("Invalid entry number")
+	}
+
+	id := tracker.entries[index].ID
+
+	err := tracker.editEntryByID(id, entry)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (tracker *MoodTracker) RemoveEntryByIndex(index int) error {
+	if index < 0 || index >= len(tracker.entries) {
+		return fmt.Errorf("Invalid entry number")
+	}
+
+	id := tracker.entries[index].ID
+
+	err := tracker.removeEntryByID(id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -46,7 +46,7 @@ func TestCLIEditMoodEntry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = tracker.AddEntry(entry)
+	err = tracker.addEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
@@ -82,7 +82,7 @@ func TestCLIRemoveMoodEntry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = tracker.AddEntry(entry)
+	err = tracker.addEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
@@ -108,7 +108,7 @@ func TestCLIRemoveMoodEntryWithInvalidIndex(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = tracker.AddEntry(entry)
+	err = tracker.addEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
@@ -136,7 +136,7 @@ func TestCLIRemoveMoodEntryWithInvalidInput(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = tracker.AddEntry(entry)
+	err = tracker.addEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
