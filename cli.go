@@ -60,6 +60,10 @@ func (cli *CLI) hasEntries() bool {
 	return len(cli.tracker.GetEntries()) > 0
 }
 
+func (cli *CLI) IsIndexValid(index int) bool {
+	return index >= 0 && index < len(cli.tracker.GetEntries())
+}
+
 func (cli *CLI) displayAllEntries() {
 	entries := cli.tracker.GetEntries()
 
@@ -144,6 +148,11 @@ func (cli *CLI) show() {
 			}
 			index := choice - 1
 
+			if !cli.IsIndexValid(index) {
+				fmt.Println("Invalid entry number")
+				continue
+			}
+
 			entry, err := cli.readNewMoodEntry()
 			if err != nil {
 				fmt.Printf("Something went wrong with adding new entry: %v", err)
@@ -172,6 +181,11 @@ func (cli *CLI) show() {
 				continue
 			}
 			index := choice - 1
+
+			if !cli.IsIndexValid(index) {
+				fmt.Println("Invalid entry number")
+				continue
+			}
 
 			err = cli.tracker.RemoveEntryByIndex(index)
 			if err != nil {
