@@ -170,3 +170,30 @@ func TestCLIEditWithEmptyTracker(t *testing.T) {
 		t.Fatalf("expected 0 entries, got %d", len(entries))
 	}
 }
+
+func TestIsIndexValid(t *testing.T) {
+	tracker, err := NewMoodTracker(&MockStorage{})
+	if err != nil {
+		t.Fatalf("failed to create tracker: %v", err)
+	}
+
+	input := strings.NewReader("0\n")
+	cli := NewCLI(tracker, input)
+
+	if cli.IsIndexValid(0) {
+		t.Error("expected IsIndexValid(0) to be false for empty tracker")
+	}
+
+	entry := MoodEntry{Mood: 5, Date: time.Now(), Note: "Test"}
+	_ = tracker.addEntry(entry)
+
+	if !cli.IsIndexValid(0) {
+		t.Error("expected IsIndexValid(0) to be true")
+	}
+	if cli.IsIndexValid(1) {
+		t.Error("expected IsIndexValid(1) to be false")
+	}
+	if cli.IsIndexValid(-1) {
+		t.Error("expected IsIndexValid(-1) to be false")
+	}
+}
