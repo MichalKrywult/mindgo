@@ -6,7 +6,7 @@ import (
 )
 
 func TestCalculateAverageMood(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -36,7 +36,7 @@ func TestCalculateAverageMood(t *testing.T) {
 }
 
 func TestCalculateAverageMoodWhenEmpty(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}

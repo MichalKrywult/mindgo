@@ -9,7 +9,7 @@ import (
 func TestCLIAddsMoodEntry(t *testing.T) {
 	input := strings.NewReader("1\n2\nGreat day\n0\n")
 
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -35,7 +35,7 @@ func TestCLIAddsMoodEntry(t *testing.T) {
 
 func TestCLIEditMoodEntry(t *testing.T) {
 	input := strings.NewReader("2\n1\n8\nGood day\n0\n")
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
@@ -72,7 +72,7 @@ func TestCLIEditMoodEntry(t *testing.T) {
 func TestCLIRemoveMoodEntry(t *testing.T) {
 	input := strings.NewReader("3\n1\n0\n")
 
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -98,7 +98,7 @@ func TestCLIRemoveMoodEntry(t *testing.T) {
 }
 
 func TestCLIRemoveMoodEntryWithInvalidIndex(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -126,7 +126,7 @@ func TestCLIRemoveMoodEntryWithInvalidIndex(t *testing.T) {
 }
 
 func TestCLIRemoveMoodEntryWithInvalidInput(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -154,7 +154,7 @@ func TestCLIRemoveMoodEntryWithInvalidInput(t *testing.T) {
 }
 
 func TestCLIEditWithEmptyTracker(t *testing.T) {
-	tracker, err := NewMoodTracker(MockStorage{})
+	tracker, err := NewMoodTracker(&MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
