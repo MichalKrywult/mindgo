@@ -88,14 +88,16 @@ func (cli *CLI) displayAllEntries() {
 	}
 }
 
-func (cli *CLI) displayAverageMood() {
-	average, err := stats.CalculateAverageMood(cli.tracker.GetEntries())
+func (c *CLI) showStatistics() {
+	entries := c.tracker.GetEntries()
+
+	summary, err := stats.CalculateStatsSummary(entries)
 	if err != nil {
-		fmt.Println("You don't have any entries")
+		fmt.Println("Błąd:", err)
 		return
 	}
-
-	fmt.Printf("Your average mood: %v\n", average)
+	fmt.Printf("Total count: %d\n", summary.TotalCount)
+	fmt.Printf("Average: %f (Min: %d, Max: %d)\n\n", summary.Average, summary.MinMood, summary.MaxMood)
 }
 
 func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
@@ -201,7 +203,7 @@ func (cli *CLI) Show() {
 			cli.displayAllEntries()
 
 		case 5:
-			cli.displayAverageMood()
+			cli.showStatistics()
 
 		case 0:
 			fmt.Println("Exit")

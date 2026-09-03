@@ -6,15 +6,39 @@ import (
 	"github.com/MichalKrywult/mindgo/internal/domain"
 )
 
-func CalculateAverageMood(entries []domain.MoodEntry) (float64, error) {
+type Summary struct {
+	TotalCount int
+	Average    float64
+	MinMood    int
+	MaxMood    int
+}
+
+func CalculateStatsSummary(entries []domain.MoodEntry) (Summary, error) {
+
 	if len(entries) == 0 {
-		return 0, fmt.Errorf("calculating average is not possible when entries list is empty")
+		return Summary{}, fmt.Errorf("calculating summary is not possible when entries list is empty")
 	}
 
-	sum := 0.0
+	average := 0.0
+	minMood := 11
+	maxMood := -1
+
 	for _, entry := range entries {
-		sum += float64(entry.Mood)
+		average += float64(entry.Mood)
+
+		if entry.Mood < minMood {
+			minMood = entry.Mood
+		}
+		if entry.Mood > maxMood {
+			maxMood = entry.Mood
+		}
 	}
 
-	return sum / float64(len(entries)), nil
+	average /= float64(len(entries))
+	totalCount := len(entries)
+
+	return Summary{TotalCount: totalCount,
+		MinMood: minMood,
+		MaxMood: maxMood,
+		Average: average}, nil
 }
