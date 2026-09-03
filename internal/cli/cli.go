@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
+	"github.com/MichalKrywult/mindgo/internal/stats"
 	"github.com/MichalKrywult/mindgo/internal/tracker"
 )
 
@@ -88,7 +89,7 @@ func (cli *CLI) displayAllEntries() {
 }
 
 func (cli *CLI) displayAverageMood() {
-	average, err := cli.tracker.CalculateAverageMood()
+	average, err := stats.CalculateAverageMood(cli.tracker.GetEntries())
 	if err != nil {
 		fmt.Println("You don't have any entries")
 		return
