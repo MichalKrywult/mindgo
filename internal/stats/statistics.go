@@ -2,6 +2,7 @@ package stats
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
 )
@@ -50,4 +51,22 @@ func CalculateStats(entries []domain.MoodEntry) (Stats, error) {
 		},
 		Dist: dist,
 	}, nil
+}
+
+func RenderHistogram(dist map[int]int, minScale, maxScale int) (string, error) {
+
+	if len(dist) == 0 {
+		return "", fmt.Errorf("length of dist cannot be 0")
+	}
+	var builder strings.Builder // builder from strings standard library
+
+	for mood := minScale; mood <= maxScale; mood++ {
+		count := dist[mood]
+		bars := strings.Repeat("█", count)
+
+		builder.WriteString(fmt.Sprintf("%2d | %s (%d)\n", mood, bars, count))
+		//%2d means that the length of d is 2 digits long - ' 3, '10' etc
+	}
+
+	return builder.String(), nil
 }

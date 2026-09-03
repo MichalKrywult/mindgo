@@ -52,3 +52,52 @@ func TestCalculateStatsSummaryWhenEmpty(t *testing.T) {
 		t.Fatal("expected error for empty entries")
 	}
 }
+
+func TestRenderHistogram(t *testing.T) {
+	dist := map[int]int{
+		1:  3,
+		5:  1,
+		8:  5,
+		10: 1,
+	}
+
+	histogram, err := stats.RenderHistogram(
+		dist,
+		domain.MinMoodValue,
+		domain.MaxMoodValue,
+	)
+
+	if err != nil {
+		t.Fatalf("something went wrong with formatting histogram: %v", err)
+	}
+
+	want := ` 1 | ███ (3)
+ 2 |  (0)
+ 3 |  (0)
+ 4 |  (0)
+ 5 | █ (1)
+ 6 |  (0)
+ 7 |  (0)
+ 8 | █████ (5)
+ 9 |  (0)
+10 | █ (1)
+`
+
+	if histogram != want {
+		t.Errorf("expected %q, got %q", want, histogram)
+	}
+}
+
+func TestRenderHistogramWhenEmpty(t *testing.T) {
+	dist := map[int]int{}
+
+	_, err := stats.RenderHistogram(
+		dist,
+		domain.MinMoodValue,
+		domain.MaxMoodValue,
+	)
+
+	if err == nil {
+		t.Fatal("expected an error for empty map")
+	}
+}
