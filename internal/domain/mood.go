@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+const (
+	MinMoodValue = 1
+	MaxMoodValue = 10
+)
+
 type MoodEntry struct {
 	ID   int       `json:"id"`
 	Mood int       `json:"mood"`
@@ -13,8 +18,7 @@ type MoodEntry struct {
 }
 
 func NewMoodEntry(mood int, date time.Time, note string) (MoodEntry, error) {
-
-	if mood < 1 || mood > 10 {
+	if mood < MinMoodValue || mood > MaxMoodValue {
 		return MoodEntry{}, errors.New("invalid Mood range")
 	}
 
