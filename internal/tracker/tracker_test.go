@@ -1,19 +1,22 @@
-package main
+package tracker
 
 import (
 	"testing"
 	"time"
+
+	"github.com/MichalKrywult/mindgo/internal/domain"
+	"github.com/MichalKrywult/mindgo/internal/storage"
 )
 
 func TestAddEntry(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 	time := time.Now()
 
-	entry := MoodEntry{Mood: 2, Date: time, Note: "Test"}
-	err = tracker.addEntry(entry)
+	entry := domain.MoodEntry{Mood: 2, Date: time, Note: "Test"}
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
@@ -36,18 +39,18 @@ func TestAddEntry(t *testing.T) {
 }
 
 func TestGetEntries(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
+	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
 
-	err = tracker.addEntry(entry)
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
-	err = tracker.addEntry(entry)
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
@@ -68,18 +71,18 @@ func TestGetEntries(t *testing.T) {
 }
 
 func TestFindIndexByID(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
+	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
 
-	err = tracker.addEntry(entry)
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
-	err = tracker.addEntry(entry)
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
@@ -113,21 +116,21 @@ func TestFindIndexByID(t *testing.T) {
 }
 
 func TestRemoveEntry(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
-	err = tracker.addEntry(entry)
+	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
-	err = tracker.addEntry(entry)
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
-	err = tracker.addEntry(entry)
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
@@ -148,13 +151,13 @@ func TestRemoveEntry(t *testing.T) {
 }
 
 func TestRemoveEntryWithInvalidID(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
-	err = tracker.addEntry(entry)
+	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
@@ -170,17 +173,17 @@ func TestRemoveEntryWithInvalidID(t *testing.T) {
 }
 
 func TestEditEntryByID(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	err = tracker.addEntry(MoodEntry{Mood: 2, Date: time.Now(), Note: "Old"})
+	err = tracker.AddEntry(domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Old"})
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
 
-	err = tracker.editEntryByID(1, MoodEntry{Mood: 5, Date: time.Now(), Note: "New"})
+	err = tracker.editEntryByID(1, domain.MoodEntry{Mood: 5, Date: time.Now(), Note: "New"})
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -206,13 +209,13 @@ func TestEditEntryByID(t *testing.T) {
 }
 
 func TestEditEntryByIDWithInvalidID(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
-	err = tracker.addEntry(entry)
+	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("unexpected error occured when adding entry, %v", err)
 	}
@@ -229,18 +232,18 @@ func TestEditEntryByIDWithInvalidID(t *testing.T) {
 }
 
 func TestEditEntryByIndex(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := MoodEntry{Mood: 2, Date: time.Now(), Note: "Old"}
-	err = tracker.addEntry(entry)
+	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Old"}
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("unexpected error occured when adding entry, %v", err)
 	}
 
-	newEntry := MoodEntry{Mood: 8, Date: time.Now(), Note: "New"}
+	newEntry := domain.MoodEntry{Mood: 8, Date: time.Now(), Note: "New"}
 
 	err = tracker.EditEntryByIndex(0, newEntry)
 	if err != nil {
@@ -253,11 +256,11 @@ func TestEditEntryByIndex(t *testing.T) {
 }
 
 func TestEditEntryByIndexForInvalidIndex(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
-	entry := MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
+	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
 
 	err = tracker.EditEntryByIndex(0, entry)
 	if err == nil {
@@ -266,13 +269,13 @@ func TestEditEntryByIndexForInvalidIndex(t *testing.T) {
 }
 
 func TestRemoveEntryByIndex(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
-	err = tracker.addEntry(entry)
+	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("unexpected error occured when adding entry, %v", err)
 	}
@@ -288,13 +291,13 @@ func TestRemoveEntryByIndex(t *testing.T) {
 }
 
 func TestRemoveEntryByIndexForInvalidIndex(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
-	err = tracker.addEntry(entry)
+	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("unexpected error occured when adding entry, %v", err)
 	}

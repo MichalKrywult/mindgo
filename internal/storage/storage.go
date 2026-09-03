@@ -32,7 +32,7 @@ type Storage interface {
 }
 
 type FileStorage struct {
-	filename string
+	Filename string
 }
 
 func (fs *FileStorage) Save(entries []domain.MoodEntry) error {
@@ -43,21 +43,21 @@ func (fs *FileStorage) Save(entries []domain.MoodEntry) error {
 		return fmt.Errorf("failed to marshal entries: %w", err)
 	}
 
-	err = os.WriteFile(fs.filename, data, 0644)
+	err = os.WriteFile(fs.Filename, data, 0644)
 	if err != nil {
-		return fmt.Errorf("failed to write file %s: %w", fs.filename, err)
+		return fmt.Errorf("failed to write file %s: %w", fs.Filename, err)
 	}
 
 	return nil
 }
 
 func (fs *FileStorage) Load() ([]domain.MoodEntry, error) {
-	data, err := os.ReadFile(fs.filename)
+	data, err := os.ReadFile(fs.Filename)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return []domain.MoodEntry{}, nil
 		}
-		return nil, fmt.Errorf("failed to read file %s: %w", fs.filename, err)
+		return nil, fmt.Errorf("failed to read file %s: %w", fs.Filename, err)
 	}
 
 	if len(data) == 0 {
@@ -68,7 +68,7 @@ func (fs *FileStorage) Load() ([]domain.MoodEntry, error) {
 
 	err = json.Unmarshal(data, &entries)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal entries from %s: %w", fs.filename, err)
+		return nil, fmt.Errorf("failed to unmarshal entries from %s: %w", fs.Filename, err)
 	}
 
 	return entries, nil
