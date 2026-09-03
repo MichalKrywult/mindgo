@@ -1,9 +1,11 @@
-package main
+package storage
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/MichalKrywult/mindgo/internal/domain"
 )
 
 func TestFileStorage_SaveAndLoad(t *testing.T) {
@@ -11,9 +13,9 @@ func TestFileStorage_SaveAndLoad(t *testing.T) {
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "test_moods.json")
 
-	storage := &FileStorage{filename: filePath}
+	storage := &FileStorage{Filename: filePath}
 
-	entries := []MoodEntry{{Mood: 5, Note: "Test"}}
+	entries := []domain.MoodEntry{{Mood: 5, Note: "Test"}}
 	err := storage.Save(entries)
 	if err != nil {
 		t.Fatalf("unexpected save error: %v", err)
@@ -33,7 +35,7 @@ func TestFileStorage_LoadNonExistentFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "non_existent.json")
 
-	storage := &FileStorage{filename: filePath}
+	storage := &FileStorage{Filename: filePath}
 
 	entries, err := storage.Load()
 	if err != nil {
@@ -54,7 +56,7 @@ func TestFileStorage_LoadCorruptedFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	storage := &FileStorage{filename: filePath}
+	storage := &FileStorage{Filename: filePath}
 
 	_, err = storage.Load()
 
@@ -73,7 +75,7 @@ func TestFileStorage_LoadEmptyFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	storage := &FileStorage{filename: filePath}
+	storage := &FileStorage{Filename: filePath}
 
 	entries, err := storage.Load()
 

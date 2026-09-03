@@ -1,23 +1,26 @@
-package main
+package tracker
 
 import (
 	"fmt"
+
+	"github.com/MichalKrywult/mindgo/internal/domain"
+	"github.com/MichalKrywult/mindgo/internal/storage"
 )
 
 func (tracker *MoodTracker) save() error {
-	if err := tracker.storage.Save(tracker.entries); err != nil {
+	if err := tracker.Storage.Save(tracker.entries); err != nil {
 		return fmt.Errorf("unexpected error occurred when saving to file: %w", err)
 	}
 	return nil
 }
 
 type MoodTracker struct {
-	entries []MoodEntry
+	entries []domain.MoodEntry
 	entryID int
-	storage Storage
+	storage.Storage
 }
 
-func NewMoodTracker(storage Storage) (*MoodTracker, error) {
+func NewMoodTracker(storage storage.Storage) (*MoodTracker, error) {
 	// read data from the file
 	entries, err := storage.Load()
 	if err != nil {
@@ -36,11 +39,11 @@ func NewMoodTracker(storage Storage) (*MoodTracker, error) {
 	return &MoodTracker{
 		entries: entries,
 		entryID: maxID,
-		storage: storage,
+		Storage: storage,
 	}, nil
 }
 
-func (tracker *MoodTracker) addEntry(entry MoodEntry) error {
+func (tracker *MoodTracker) AddEntry(entry domain.MoodEntry) error {
 	tracker.entryID++
 	entry.ID = tracker.entryID
 	tracker.entries = append(tracker.entries, entry)
@@ -51,8 +54,8 @@ func (tracker *MoodTracker) addEntry(entry MoodEntry) error {
 	return nil
 }
 
-func (tracker *MoodTracker) GetEntries() []MoodEntry {
-	entries := make([]MoodEntry, len(tracker.entries))
+func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {
+	entries := make([]domain.MoodEntry, len(tracker.entries))
 	//we have to create space for that copy with make()
 	// copy() doesn't make a slice bigger
 	copy(entries, tracker.entries)
@@ -97,7 +100,7 @@ func (tracker *MoodTracker) removeEntryByID(id int) error {
 	return nil
 }
 
-func (tracker *MoodTracker) editEntryByID(id int, entry MoodEntry) error {
+func (tracker *MoodTracker) editEntryByID(id int, entry domain.MoodEntry) error {
 	index, err := tracker.findIndexByID(id)
 	if err != nil {
 		return err
@@ -113,7 +116,7 @@ func (tracker *MoodTracker) editEntryByID(id int, entry MoodEntry) error {
 	return nil
 }
 
-func (tracker *MoodTracker) EditEntryByIndex(index int, entry MoodEntry) error {
+func (tracker *MoodTracker) EditEntryByIndex(index int, entry domain.MoodEntry) error {
 	if index < 0 || index >= len(tracker.entries) {
 		return fmt.Errorf("Invalid entry number")
 	}

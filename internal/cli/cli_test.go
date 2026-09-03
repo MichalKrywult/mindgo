@@ -1,22 +1,26 @@
-package main
+package cli
 
 import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/MichalKrywult/mindgo/internal/domain"
+	"github.com/MichalKrywult/mindgo/internal/storage"
+	"github.com/MichalKrywult/mindgo/internal/tracker"
 )
 
 func TestCLIAddsMoodEntry(t *testing.T) {
 	input := strings.NewReader("1\n2\nGreat day\n0\n")
 
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := tracker.NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
 	cli := NewCLI(tracker, input)
 
-	cli.show()
+	cli.Show()
 
 	entries := tracker.GetEntries()
 
@@ -35,24 +39,24 @@ func TestCLIAddsMoodEntry(t *testing.T) {
 
 func TestCLIEditMoodEntry(t *testing.T) {
 	input := strings.NewReader("2\n1\n8\nGood day\n0\n")
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := tracker.NewMoodTracker(&storage.MockStorage{})
 
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry, err := NewMoodEntry(2, time.Now(), "Bad day")
+	entry, err := domain.NewMoodEntry(2, time.Now(), "Bad day")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = tracker.addEntry(entry)
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
 
 	cli := NewCLI(tracker, input)
-	cli.show()
+	cli.Show()
 
 	entries := tracker.GetEntries()
 
@@ -72,23 +76,23 @@ func TestCLIEditMoodEntry(t *testing.T) {
 func TestCLIRemoveMoodEntry(t *testing.T) {
 	input := strings.NewReader("3\n1\n0\n")
 
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := tracker.NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry, err := NewMoodEntry(2, time.Now(), "Test")
+	entry, err := domain.NewMoodEntry(2, time.Now(), "Test")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = tracker.addEntry(entry)
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
 
 	cli := NewCLI(tracker, input)
-	cli.show()
+	cli.Show()
 
 	entries := tracker.GetEntries()
 
@@ -98,17 +102,17 @@ func TestCLIRemoveMoodEntry(t *testing.T) {
 }
 
 func TestCLIRemoveMoodEntryWithInvalidIndex(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := tracker.NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry, err := NewMoodEntry(2, time.Now(), "Test")
+	entry, err := domain.NewMoodEntry(2, time.Now(), "Test")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = tracker.addEntry(entry)
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
@@ -116,7 +120,7 @@ func TestCLIRemoveMoodEntryWithInvalidIndex(t *testing.T) {
 	input := strings.NewReader("3\n99\n0\n")
 
 	cli := NewCLI(tracker, input)
-	cli.show()
+	cli.Show()
 
 	entries := tracker.GetEntries()
 
@@ -126,17 +130,17 @@ func TestCLIRemoveMoodEntryWithInvalidIndex(t *testing.T) {
 }
 
 func TestCLIRemoveMoodEntryWithInvalidInput(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := tracker.NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry, err := NewMoodEntry(2, time.Now(), "Test")
+	entry, err := domain.NewMoodEntry(2, time.Now(), "Test")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = tracker.addEntry(entry)
+	err = tracker.AddEntry(entry)
 	if err != nil {
 		t.Fatalf("Unexpected error occured when adding entry, %v", err)
 	}
@@ -144,7 +148,7 @@ func TestCLIRemoveMoodEntryWithInvalidInput(t *testing.T) {
 	input := strings.NewReader("3\nabc\n0\n")
 
 	cli := NewCLI(tracker, input)
-	cli.show()
+	cli.Show()
 
 	entries := tracker.GetEntries()
 
@@ -154,7 +158,7 @@ func TestCLIRemoveMoodEntryWithInvalidInput(t *testing.T) {
 }
 
 func TestCLIEditWithEmptyTracker(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := tracker.NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -162,7 +166,7 @@ func TestCLIEditWithEmptyTracker(t *testing.T) {
 	input := strings.NewReader("2\n0\n")
 
 	cli := NewCLI(tracker, input)
-	cli.show()
+	cli.Show()
 
 	entries := tracker.GetEntries()
 
@@ -172,7 +176,7 @@ func TestCLIEditWithEmptyTracker(t *testing.T) {
 }
 
 func TestIsIndexValid(t *testing.T) {
-	tracker, err := NewMoodTracker(&MockStorage{})
+	tracker, err := tracker.NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -184,8 +188,8 @@ func TestIsIndexValid(t *testing.T) {
 		t.Error("expected IsIndexValid(0) to be false for empty tracker")
 	}
 
-	entry := MoodEntry{Mood: 5, Date: time.Now(), Note: "Test"}
-	_ = tracker.addEntry(entry)
+	entry := domain.MoodEntry{Mood: 5, Date: time.Now(), Note: "Test"}
+	_ = tracker.AddEntry(entry)
 
 	if !cli.IsIndexValid(0) {
 		t.Error("expected IsIndexValid(0) to be true")

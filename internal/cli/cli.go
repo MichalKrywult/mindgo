@@ -1,4 +1,4 @@
-package main
+package cli
 
 import (
 	"bufio"
@@ -7,14 +7,18 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/MichalKrywult/mindgo/internal/domain"
+	"github.com/MichalKrywult/mindgo/internal/stats"
+	"github.com/MichalKrywult/mindgo/internal/tracker"
 )
 
 type CLI struct {
-	tracker *MoodTracker
+	tracker *tracker.MoodTracker
 	scanner *bufio.Scanner
 }
 
-func NewCLI(tracker *MoodTracker, input io.Reader) *CLI {
+func NewCLI(tracker *tracker.MoodTracker, input io.Reader) *CLI {
 	return &CLI{
 		tracker: tracker,
 		scanner: bufio.NewScanner(input),
@@ -85,7 +89,7 @@ func (cli *CLI) displayAllEntries() {
 }
 
 func (cli *CLI) displayAverageMood() {
-	average, err := cli.tracker.CalculateAverageMood()
+	average, err := stats.CalculateAverageMood(cli.tracker.GetEntries())
 	if err != nil {
 		fmt.Println("You don't have any entries")
 		return
@@ -94,25 +98,25 @@ func (cli *CLI) displayAverageMood() {
 	fmt.Printf("Your average mood: %v\n", average)
 }
 
-func (cli *CLI) readNewMoodEntry() (MoodEntry, error) {
+func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
 	fmt.Print("Mood score (1-10): ")
 
 	mood, err := cli.readInt()
 	if err != nil {
-		return MoodEntry{}, err
+		return domain.MoodEntry{}, err
 	}
 
 	fmt.Print("Note: ")
 
 	note, err := cli.readLine()
 	if err != nil {
-		return MoodEntry{}, err
+		return domain.MoodEntry{}, err
 	}
 
-	return NewMoodEntry(mood, time.Now(), note)
+	return domain.NewMoodEntry(mood, time.Now(), note)
 }
 
-func (cli *CLI) show() {
+func (cli *CLI) Show() {
 	for {
 		choice := cli.displayMenuAndReadChoice()
 
@@ -124,7 +128,7 @@ func (cli *CLI) show() {
 				continue
 			}
 
-			err = cli.tracker.addEntry(entry)
+			err = cli.tracker.AddEntry(entry)
 			if err != nil {
 				fmt.Println("Unexpected error occured:", err)
 				continue
