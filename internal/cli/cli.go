@@ -91,13 +91,19 @@ func (cli *CLI) displayAllEntries() {
 func (c *CLI) showStatistics() {
 	entries := c.tracker.GetEntries()
 
-	summary, err := stats.CalculateStatsSummary(entries)
+	stats, err := stats.CalculateStats(entries)
 	if err != nil {
 		fmt.Println("Błąd:", err)
 		return
 	}
-	fmt.Printf("Total count: %d\n", summary.TotalCount)
-	fmt.Printf("Average: %f (Min: %d, Max: %d)\n\n", summary.Average, summary.MinMood, summary.MaxMood)
+
+	fmt.Printf("Total count: %d\n", stats.Summary.TotalCount)
+	fmt.Printf("Average: %f (Min: %d, Max: %d)\n\n",
+		stats.Summary.Average,
+		stats.Summary.MinMood,
+		stats.Summary.MaxMood)
+
+	
 }
 
 func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
