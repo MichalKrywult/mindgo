@@ -1,53 +1,103 @@
-package stats
+package stats_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
-	"github.com/MichalKrywult/mindgo/internal/storage"
-	"github.com/MichalKrywult/mindgo/internal/tracker"
+	"github.com/MichalKrywult/mindgo/internal/stats"
 )
 
-func TestCalculateAverageMood(t *testing.T) {
-	tracker, err := tracker.NewMoodTracker(&storage.MockStorage{})
-	if err != nil {
-		t.Fatalf("failed to create tracker: %v", err)
+func TestCalculateStatsSummary(t *testing.T) {
+	entries := []domain.MoodEntry{
+		{Mood: 2, Note: "Test"},
+		{Mood: 4, Note: "Test"},
 	}
 
-	entry1 := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
-	time.Sleep(100 * time.Millisecond)
-	entry2 := domain.MoodEntry{Mood: 4, Date: time.Now(), Note: "Test"}
+	result, err := stats.CalculateStats(entries)
 
-	err = tracker.AddEntry(entry1)
 	if err != nil {
-		t.Fatalf("failed to add entry: %v", err)
+		t.Fatalf("unexpected error: %v", err)
 	}
 
-	err = tracker.AddEntry(entry2)
-	if err != nil {
-		t.Fatalf("failed to add entry: %v", err)
+	summary := result.Summary
+
+	if summary.TotalCount != 2 {
+		t.Errorf("expected total count 2, got %v", summary.TotalCount)
 	}
 
-	average, err := CalculateAverageMood(tracker.GetEntries())
-	if err != nil {
-		t.Errorf("unexpected error: %v", err)
+	if summary.MinMood != 2 {
+		t.Errorf("expected min mood 2, got %v", summary.MinMood)
 	}
 
-	if average != 3 {
-		t.Errorf("calculated average is wrong, expected: %v, got: %v", 3, average)
+	if summary.MaxMood != 4 {
+		t.Errorf("expected max mood 4, got %v", summary.MaxMood)
+	}
+
+	if summary.Average != 3 {
+		t.Errorf("expected average 3, got %v", summary.Average)
+	}
+
+	if result.Dist[2] != 1 {
+		t.Errorf("expected mood 2 count 1, got %v", result.Dist[2])
+	}
+
+}
+
+func TestCalculateStatsSummaryWhenEmpty(t *testing.T) {
+	entries := []domain.MoodEntry{}
+
+	_, err := stats.CalculateStats(entries)
+
+	if err == nil {
+		t.Fatal("expected error for empty entries")
 	}
 }
 
-func TestCalculateAverageMoodWhenEmpty(t *testing.T) {
-	tracker, err := tracker.NewMoodTracker(&storage.MockStorage{})
-	if err != nil {
-		t.Fatalf("failed to create tracker: %v", err)
+func TestRenderHistogram(t *testing.T) {
+	dist := map[int]int{
+		1:  3,
+		5:  1,
+		8:  5,
+		10: 1,
 	}
 
-	_, err = CalculateAverageMood(tracker.GetEntries())
+	histogram, err := stats.RenderHistogram(
+		dist,
+		domain.MinMoodValue,
+		domain.MaxMoodValue,
+	)
+
+	if err != nil {
+		t.Fatalf("something went wrong with formatting histogram: %v", err)
+	}
+
+	want := ` 1 | ███ (3)
+ 2 |  (0)
+ 3 |  (0)
+ 4 |  (0)
+ 5 | █ (1)
+ 6 |  (0)
+ 7 |  (0)
+ 8 | █████ (5)
+ 9 |  (0)
+10 | █ (1)
+`
+
+	if histogram != want {
+		t.Errorf("expected %q, got %q", want, histogram)
+	}
+}
+
+func TestRenderHistogramWhenEmpty(t *testing.T) {
+	dist := map[int]int{}
+
+	_, err := stats.RenderHistogram(
+		dist,
+		domain.MinMoodValue,
+		domain.MaxMoodValue,
+	)
 
 	if err == nil {
-		t.Error("expected an error for trying to calculate average on empty tracker ")
+		t.Fatal("expected an error for empty map")
 	}
 }

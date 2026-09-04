@@ -88,16 +88,6 @@ func (cli *CLI) displayAllEntries() {
 	}
 }
 
-func (cli *CLI) displayAverageMood() {
-	average, err := stats.CalculateAverageMood(cli.tracker.GetEntries())
-	if err != nil {
-		fmt.Println("You don't have any entries")
-		return
-	}
-
-	fmt.Printf("Your average mood: %v\n", average)
-}
-
 func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
 	fmt.Print("Mood score (1-10): ")
 
@@ -201,7 +191,30 @@ func (cli *CLI) Show() {
 			cli.displayAllEntries()
 
 		case 5:
-			cli.displayAverageMood()
+			entries := cli.tracker.GetEntries()
+			statsData, err := stats.CalculateStats(entries)
+			if err != nil {
+				fmt.Println("Something went wrong:", err)
+				continue
+			}
+
+			fmt.Printf("Total count: %d\n", statsData.Summary.TotalCount)
+			fmt.Printf("Average: %.2f (Min: %d, Max: %d)\n\n",
+				statsData.Summary.Average,
+				statsData.Summary.MinMood,
+				statsData.Summary.MaxMood)
+
+			fmt.Println("Histogram:")
+			histogram, err := stats.RenderHistogram(
+				statsData.Dist,
+				domain.MinMoodValue,
+				domain.MaxMoodValue)
+
+			if err != nil {
+				fmt.Println("Something went wrong:", err)
+			}
+
+			fmt.Print(histogram)
 
 		case 0:
 			fmt.Println("Exit")
