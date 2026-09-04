@@ -5,13 +5,19 @@ import (
 	"os"
 
 	"github.com/MichalKrywult/mindgo/internal/cli"
+	"github.com/MichalKrywult/mindgo/internal/config"
 	"github.com/MichalKrywult/mindgo/internal/storage"
 	"github.com/MichalKrywult/mindgo/internal/tracker"
 )
 
 func main() {
 
-	storage := storage.FileStorage{Filename: "moods.json"}
+	cfg, err := config.GetDefaultConfig()
+	if err != nil {
+		fmt.Printf("Failed to load configuration: %v", err)
+	}
+
+	storage := storage.FileStorage{Filename: cfg.DataFilePath}
 	tracker, err := tracker.NewMoodTracker(&storage)
 	if err != nil {
 		fmt.Println("Error initializing tracker:", err)
