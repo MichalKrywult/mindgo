@@ -12,7 +12,7 @@ import (
 
 func main() {
 
-	cfg, err := config.GetDefaultConfig()
+	cfg, err := config.GetConfig()
 	if err != nil {
 		fmt.Printf("Failed to load configuration: %v", err)
 	}

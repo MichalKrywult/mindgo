@@ -9,7 +9,7 @@ import (
 
 func TestGetDefaultConfig(t *testing.T) {
 
-	config, err := config.GetDefaultConfig()
+	config, err := config.GetConfig()
 	if err != nil {
 		t.Fatal("unexpected error: ", err)
 	}
