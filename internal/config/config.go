@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -10,21 +11,36 @@ type Config struct {
 	DataFilePath string
 }
 
+const (
+	defaultDataFilePath = "moods.json"
+)
+
 func GetConfig() (Config, error) {
 
-	file := flag.String("file", "moods.json", "moods saving file name")
-	flag.Parse() // super important, otherwise flags won't work 
+	file := flag.String("file", defaultDataFilePath, "moods saving file name in default location")
+	path := flag.String("path", defaultDataFilePath, "full path to moods saving file")
+
+	flag.Parse() //super important, otherwise flags won't work
+
+	if *file != defaultDataFilePath && *path != defaultDataFilePath {
+		return Config{}, fmt.Errorf("flags file and path were used simultaneously, which is prohibited")
+	}
 
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return Config{}, err
 	}
 
-	appDir := filepath.Join(configDir, "mindgo")
-	fullPath := filepath.Join(appDir, *file)
+	var fullPath string
 
-	err = os.MkdirAll(appDir, 0755)
-	if err != nil {
+	if *path != defaultDataFilePath {
+		fullPath = *path
+	} else {
+		appDir := filepath.Join(configDir, "mindgo")
+		fullPath = filepath.Join(appDir, *file)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
 		return Config{}, err
 	}
 
