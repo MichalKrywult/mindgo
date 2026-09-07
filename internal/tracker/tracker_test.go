@@ -226,7 +226,7 @@ func TestEditEntryByIDWithInvalidID(t *testing.T) {
 	}
 
 	data := tracker.GetEntries()
-	if data[0].ID != 9999999999999999 {
+	if data[0].ID != 1 {
 		t.Error("entry was edited despite wrong ID")
 	}
 }
