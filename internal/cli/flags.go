@@ -51,20 +51,19 @@ func ParseFlags() (flags, error) {
 }
 
 func BuildPath(parsedFlags flags) (string, error) {
-
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	var fullPath string
-
 	if parsedFlags.path != "" {
-		fullPath = parsedFlags.path
-	} else {
-		appDir := filepath.Join(configDir, "mindgo")
-		fullPath = filepath.Join(appDir, parsedFlags.file)
+		return parsedFlags.path, nil
 	}
 
-	return fullPath, nil
+	file := parsedFlags.file
+	if file == "" {
+		file = "moods.json"
+	}
+
+	return filepath.Join(configDir, "mindgo", file), nil
 }
