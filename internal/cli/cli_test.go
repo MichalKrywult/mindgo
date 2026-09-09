@@ -201,3 +201,29 @@ func TestIsIndexValid(t *testing.T) {
 		t.Error("expected IsIndexValid(-1) to be false")
 	}
 }
+
+func TestInvalidInput(t *testing.T) {
+	tracker, err := tracker.NewMoodTracker(&storage.MockStorage{})
+	if err != nil {
+		t.Fatalf("failed to create tracker: %v", err)
+	}
+
+	input := strings.NewReader("abc\n1\n8\nGood day\n0\n")
+	cli := NewCLI(tracker, input)
+	cli.Show()
+
+	entries := tracker.GetEntries()
+	if len(entries) != 1 {
+		t.Fatalf("expected 1 entry, got %d", len(entries))
+	}
+
+	if entries[0].Mood != 8 {
+		t.Errorf("expected Mood value to be 8, got %d", entries[0].Mood)
+	}
+	if entries[0].Note != "Good day" {
+		t.Errorf("expected Note value to be 'Good day', got %s", entries[0].Note)
+	}
+	if entries[0].ID != 1 {
+		t.Errorf("expected ID value to be 1, got %d", entries[0].ID)
+	}
+}

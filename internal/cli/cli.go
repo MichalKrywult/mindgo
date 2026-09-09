@@ -159,7 +159,7 @@ func (cli *CLI) Show() {
 
 			err = cli.tracker.EditEntryByIndex(index, entry)
 			if err != nil {
-				fmt.Printf("Something went wrong with editing entry: %v", err)
+				fmt.Printf("Something went wrong with editing entry: %v\n", err)
 				continue
 			}
 
