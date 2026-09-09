@@ -18,17 +18,29 @@ const (
 
 func ParseFlags() (flags, error) {
 
-	file := flag.String("file", defaultDataFilePath, "moods saving file name in default location")
-	path := flag.String("path", defaultDataFilePath, "full path to moods saving file")
+	fs := flag.NewFlagSet("moods", flag.ContinueOnError)
+	// flag.ContinueOnError won't cause program to crash if something goes wrong
+	//instead it will just throw error to handle
 
-	flag.Parse() //super important, otherwise flags won't work
+	file := fs.String("file", defaultDataFilePath, "moods saving file name in default location")
+	path := fs.String("path", defaultDataFilePath, "full path to moods saving file")
+
+	//file := flag.String("file", defaultDataFilePath, "moods saving file name in default location")
+	//path := flag.String("path", defaultDataFilePath, "full path to moods saving file")
+	//instead of global flags we use our own flagSet
+
+	err := fs.Parse(os.Args[1:])
+	if err != nil {
+		return flags{}, err
+	}
+	// instead of flag.Parse()
 
 	fileSet := false
 	pathSet := false
 
-	// flag.Visit iterates over flags that were provided by the user
+	// fs(*flag.FlagSet).Visit iterates over flags that were provided by the user
 	// the function passed to Visit is anonymous and is called once for each flag
-	flag.Visit(func(f *flag.Flag) {
+	fs.Visit(func(f *flag.Flag) {
 		if f.Name == "file" {
 			fileSet = true
 		}
@@ -47,7 +59,6 @@ func ParseFlags() (flags, error) {
 	}
 
 	return flags{file: *file}, nil
-
 }
 
 func BuildPath(parsedFlags flags) (string, error) {
