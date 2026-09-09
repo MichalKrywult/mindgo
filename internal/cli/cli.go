@@ -42,7 +42,7 @@ func (cli *CLI) readInt() (int, error) {
 	return strconv.Atoi(text)
 }
 
-func (cli *CLI) displayMenuAndReadChoice() int {
+func (cli *CLI) displayMenuAndReadChoice() (int, error) {
 	fmt.Println("=====MENU=====")
 	fmt.Println("1. New entry")
 	fmt.Println("2. Edit entry")
@@ -54,10 +54,10 @@ func (cli *CLI) displayMenuAndReadChoice() int {
 	fmt.Print("Your choice: ")
 	choice, err := cli.readInt()
 	if err != nil {
-		return -1
+		return 0, err
 	}
 
-	return choice
+	return choice, nil
 }
 
 func (cli *CLI) hasEntries() bool {
@@ -108,7 +108,11 @@ func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
 
 func (cli *CLI) Show() {
 	for {
-		choice := cli.displayMenuAndReadChoice()
+		choice, err := cli.displayMenuAndReadChoice()
+		if err != nil {
+			fmt.Printf("Invalid choice: %v", err)
+			continue
+		}
 
 		switch choice {
 		case 1:
