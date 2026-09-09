@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,6 +15,10 @@ func main() {
 
 	parsedFlags, err := cli.ParseFlags()
 	if err != nil {
+		if err == flag.ErrHelp {
+			return
+		}
+
 		fmt.Println("Error with parsing flags:", err)
 		return
 	}
@@ -29,13 +34,13 @@ func main() {
 		return
 	}
 
-	storage := storage.FileStorage{Filename: path}
-	tracker, err := tracker.NewMoodTracker(&storage)
+	fileStorage := storage.FileStorage{Filename: path}
+	moodTracker, err := tracker.NewMoodTracker(&fileStorage)
 	if err != nil {
 		fmt.Println("Error initializing tracker:", err)
 		return
 	}
 
-	cli := cli.NewCLI(tracker, os.Stdin) // the tracker is a pointer, received from NewMoodTracker function
+	cli := cli.NewCLI(moodTracker, os.Stdin) // the tracker is a pointer, received from NewMoodTracker function
 	cli.Show()
 }
