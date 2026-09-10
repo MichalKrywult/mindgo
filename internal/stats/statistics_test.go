@@ -1,6 +1,7 @@
 package stats_test
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -104,19 +105,38 @@ func TestRenderHistogramWhenEmpty(t *testing.T) {
 }
 
 func TestCalculateStatsByWeekday(t *testing.T) {
-	entries := []domain.MoodEntry{
-		{Date: time.Date(2026, 9, 7, 0, 0, 0, 0, time.UTC), Mood: 4},  // Monday
-		{Date: time.Date(2026, 9, 14, 0, 0, 0, 0, time.UTC), Mood: 2}, // Monday
-		{Date: time.Date(2026, 9, 8, 0, 0, 0, 0, time.UTC), Mood: 5},  // Tuesday
+	tests := []struct {
+		name     string
+		entries  []domain.MoodEntry
+		expected map[time.Weekday]float64
+	}{
+		{
+			name: "multiple entries on the same weekday",
+			entries: []domain.MoodEntry{
+				{Date: time.Date(2026, 9, 7, 0, 0, 0, 0, time.UTC), Mood: 4},
+				{Date: time.Date(2026, 9, 14, 0, 0, 0, 0, time.UTC), Mood: 3},
+				{Date: time.Date(2026, 9, 8, 0, 0, 0, 0, time.UTC), Mood: 5},
+			},
+			expected: map[time.Weekday]float64{
+				time.Monday:  3.5,
+				time.Tuesday: 5,
+			},
+		},
+		{
+			name:     "empty list",
+			entries:  []domain.MoodEntry{},
+			expected: map[time.Weekday]float64{},
+		},
 	}
 
-	got := stats.CalculateStatsByWeekday(entries)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			statsByWeekday := stats.CalculateStatsByWeekday(tt.entries)
 
-	if got[time.Monday] != 3 {
-		t.Errorf("expected Monday average to be 3, got %v", got[time.Monday])
-	}
+			if !reflect.DeepEqual(statsByWeekday, tt.expected) { //allows to compare maps
+				t.Errorf("expected %v, got %v", tt.expected, statsByWeekday)
+			}
 
-	if got[time.Tuesday] != 5 {
-		t.Errorf("expected Tuesday average to be 5, got %v", got[time.Tuesday])
+		})
 	}
 }
