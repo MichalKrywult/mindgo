@@ -27,6 +27,9 @@ func NewCLI(tracker *tracker.MoodTracker, input io.Reader) *CLI {
 
 func (cli *CLI) readLine() (string, error) {
 	if !cli.scanner.Scan() {
+		if cli.scanner.Err() == nil { // in that case EOF occurs
+			return "", io.EOF
+		}
 		return "", cli.scanner.Err()
 	}
 
@@ -42,7 +45,7 @@ func (cli *CLI) readInt() (int, error) {
 	return strconv.Atoi(text)
 }
 
-func (cli *CLI) displayMenuAndReadChoice() int {
+func (cli *CLI) displayMenuAndReadChoice() (int, error) {
 	fmt.Println("=====MENU=====")
 	fmt.Println("1. New entry")
 	fmt.Println("2. Edit entry")
@@ -54,10 +57,10 @@ func (cli *CLI) displayMenuAndReadChoice() int {
 	fmt.Print("Your choice: ")
 	choice, err := cli.readInt()
 	if err != nil {
-		return -1
+		return 0, err
 	}
 
-	return choice
+	return choice, nil
 }
 
 func (cli *CLI) hasEntries() bool {
@@ -108,7 +111,15 @@ func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
 
 func (cli *CLI) Show() {
 	for {
-		choice := cli.displayMenuAndReadChoice()
+		choice, err := cli.displayMenuAndReadChoice()
+		if err != nil {
+			if err == io.EOF {
+				return
+			}
+
+			fmt.Printf("Invalid choice: %v\n", err)
+			continue
+		}
 
 		switch choice {
 		case 1:
@@ -155,7 +166,7 @@ func (cli *CLI) Show() {
 
 			err = cli.tracker.EditEntryByIndex(index, entry)
 			if err != nil {
-				fmt.Printf("Something went wrong with editing entry: %v", err)
+				fmt.Printf("Something went wrong with editing entry: %v\n", err)
 				continue
 			}
 
