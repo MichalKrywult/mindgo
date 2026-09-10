@@ -210,7 +210,7 @@ func (cli *CLI) Show() {
 			}
 
 			fmt.Printf("Total count: %d\n", statsData.Summary.TotalCount)
-			fmt.Printf("Average: %.2f (Min: %d, Max: %d)\n\n",
+			fmt.Printf("Average: %.2f (Min: %d, Max: %d)\n",
 				statsData.Summary.Average,
 				statsData.Summary.MinMood,
 				statsData.Summary.MaxMood)
@@ -226,6 +226,11 @@ func (cli *CLI) Show() {
 			}
 
 			fmt.Print(histogram)
+
+			statsByDay := stats.CalculateStatsByWeekday(entries)
+			for day, average := range statsByDay {
+				fmt.Printf("%s: %.2f\n", day, average)
+			}
 
 		case 0:
 			fmt.Println("Exit")

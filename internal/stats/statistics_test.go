@@ -2,6 +2,7 @@ package stats_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
 	"github.com/MichalKrywult/mindgo/internal/stats"
@@ -99,5 +100,23 @@ func TestRenderHistogramWhenEmpty(t *testing.T) {
 
 	if err == nil {
 		t.Fatal("expected an error for empty map")
+	}
+}
+
+func TestCalculateStatsByWeekday(t *testing.T) {
+	entries := []domain.MoodEntry{
+		{Date: time.Date(2026, 9, 7, 0, 0, 0, 0, time.UTC), Mood: 4},  // Monday
+		{Date: time.Date(2026, 9, 14, 0, 0, 0, 0, time.UTC), Mood: 2}, // Monday
+		{Date: time.Date(2026, 9, 8, 0, 0, 0, 0, time.UTC), Mood: 5},  // Tuesday
+	}
+
+	got := stats.CalculateStatsByWeekday(entries)
+
+	if got[time.Monday] != 3 {
+		t.Errorf("expected Monday average to be 3, got %v", got[time.Monday])
+	}
+
+	if got[time.Tuesday] != 5 {
+		t.Errorf("expected Tuesday average to be 5, got %v", got[time.Tuesday])
 	}
 }
