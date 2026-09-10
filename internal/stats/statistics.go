@@ -3,6 +3,7 @@ package stats
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
 )
@@ -69,4 +70,29 @@ func RenderHistogram(dist map[int]int, minScale, maxScale int) (string, error) {
 	}
 
 	return builder.String(), nil
+}
+
+func CalculateStatsByWeekday(entries []domain.MoodEntry) map[time.Weekday]float64 {
+	weekdays := make(map[time.Weekday]struct { // anonymoous struct
+		Sum   float64
+		Count int
+	})
+
+	for _, entry := range entries {
+		day := entry.Date.Weekday() //we can modify only 'local' copy
+
+		stats := weekdays[day]
+		stats.Sum += float64(entry.Mood)
+		stats.Count++
+
+		weekdays[day] = stats
+	}
+
+	averages := make(map[time.Weekday]float64)
+
+	for day, stats := range weekdays {
+		averages[day] = stats.Sum / float64(stats.Count)
+	}
+
+	return averages
 }
