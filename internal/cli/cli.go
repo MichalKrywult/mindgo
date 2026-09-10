@@ -110,7 +110,11 @@ func (cli *CLI) Show() {
 	for {
 		choice, err := cli.displayMenuAndReadChoice()
 		if err != nil {
-			fmt.Printf("Invalid choice: %v", err)
+			if err == io.EOF {
+				return
+			}
+
+			fmt.Printf("Invalid choice: %v\n", err)
 			continue
 		}
 
