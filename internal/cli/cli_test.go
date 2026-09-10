@@ -47,6 +47,14 @@ func TestCLI(t *testing.T) {
 		expectedNote  string
 	}{
 		{
+			name:          "test invalid input",
+			initialEntry:  nil, // return the pointer
+			input:         "abc\nabc\n",
+			expectedCount: 0,
+			expectedMood:  0,
+			expectedNote:  "",
+		},
+		{
 			name:          "test add entry",
 			initialEntry:  nil,
 			input:         "1\n8\nGreat day\n0\n",

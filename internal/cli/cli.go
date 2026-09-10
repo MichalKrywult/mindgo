@@ -27,6 +27,9 @@ func NewCLI(tracker *tracker.MoodTracker, input io.Reader) *CLI {
 
 func (cli *CLI) readLine() (string, error) {
 	if !cli.scanner.Scan() {
+		if cli.scanner.Err() == nil { // in that case EOF occurs
+			return "", io.EOF
+		}
 		return "", cli.scanner.Err()
 	}
 
