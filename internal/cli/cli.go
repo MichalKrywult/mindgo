@@ -227,8 +227,27 @@ func (cli *CLI) Show() {
 
 			fmt.Print(histogram)
 
+			fmt.Println("Average mood for each day:")
 			statsByDay := stats.CalculateStatsByWeekday(entries)
-			for day, average := range statsByDay {
+			days := []time.Weekday{ //for some reason days in Go start from Sunday,
+				//so it's needed to create slice of days
+				time.Monday,
+				time.Tuesday,
+				time.Wednesday,
+				time.Thursday,
+				time.Friday,
+				time.Saturday,
+				time.Sunday,
+			}
+
+			for _, day := range days {
+				average, exists := statsByDay[day]
+
+				if !exists {
+					fmt.Printf("%s: N/A\n", day)
+					continue
+				}
+
 				fmt.Printf("%s: %.2f\n", day, average)
 			}
 
