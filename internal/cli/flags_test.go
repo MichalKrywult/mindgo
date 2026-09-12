@@ -40,7 +40,7 @@ func TestParseFlags(t *testing.T) {
 		{
 			name:     "no flags",
 			args:     []string{"program"},
-			expected: flags{file: defaultDataFilePath},
+			expected: flags{file: ""},
 			err:      false,
 		},
 	}
