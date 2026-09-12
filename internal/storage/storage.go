@@ -8,10 +8,30 @@ import (
 	"github.com/MichalKrywult/mindgo/internal/domain"
 )
 
+type Storage interface {
+	Save([]domain.MoodEntry) error
+	Load() ([]domain.MoodEntry, error)
+}
+
+// always returns an error
+type ErrorStorage struct{}
+
 // MockStorage pretends to be real storage for tests
 // it remembers last state of storage
 type MockStorage struct {
 	entries []domain.MoodEntry
+}
+
+type FileStorage struct {
+	Filename string
+}
+
+func (e *ErrorStorage) Save([]domain.MoodEntry) error {
+	return fmt.Errorf("save error")
+}
+
+func (e *ErrorStorage) Load() ([]domain.MoodEntry, error) {
+	return nil, nil
 }
 
 func (m *MockStorage) Save(entries []domain.MoodEntry) error {
@@ -24,15 +44,6 @@ func (m *MockStorage) Load() ([]domain.MoodEntry, error) {
 	copy(entries, m.entries)
 
 	return entries, nil
-}
-
-type Storage interface {
-	Save([]domain.MoodEntry) error
-	Load() ([]domain.MoodEntry, error)
-}
-
-type FileStorage struct {
-	Filename string
 }
 
 func (fs *FileStorage) Save(entries []domain.MoodEntry) error {
