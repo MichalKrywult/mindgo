@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
+	"github.com/MichalKrywult/mindgo/internal/export"
 	"github.com/MichalKrywult/mindgo/internal/stats"
 	"github.com/MichalKrywult/mindgo/internal/tracker"
 )
@@ -52,6 +53,7 @@ func (cli *CLI) displayMenuAndReadChoice() (int, error) {
 	fmt.Println("3. Remove entry")
 	fmt.Println("4. Show history")
 	fmt.Println("5. Show statistics")
+	fmt.Println("6. Export to csv")
 	fmt.Println("0. Exit")
 
 	fmt.Print("Your choice: ")
@@ -250,6 +252,16 @@ func (cli *CLI) Show() {
 
 				fmt.Printf("%s: %.2f\n", day, average)
 			}
+
+		case 6:
+			entries := cli.tracker.GetEntries()
+
+			err := export.ExportEntriesToCSV(entries)
+			if err != nil {
+				fmt.Printf("Unexpected error occured: %v", err)
+				continue
+			}
+			fmt.Println("Entries exported succesfully")
 
 		case 0:
 			fmt.Println("Exit")

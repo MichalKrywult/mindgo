@@ -13,6 +13,7 @@ The project is created primarily for learning Go through building a real-life ap
 - CLI interface
 - JSON data storage
 - Configurable application data path
+- export data to csv file
 
 The application stores its data in the user's standard configuration directory:
 
