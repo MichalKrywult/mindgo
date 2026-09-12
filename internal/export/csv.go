@@ -5,14 +5,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"strconv"
 
+	"github.com/MichalKrywult/mindgo/internal/config"
 	"github.com/MichalKrywult/mindgo/internal/domain"
-)
-
-const (
-	defaultExportCSVFilePath = "moods.csv"
 )
 
 func exportCSV(entries []domain.MoodEntry, w io.Writer) error {
@@ -36,14 +32,13 @@ func exportCSV(entries []domain.MoodEntry, w io.Writer) error {
 	return nil
 }
 
-func createExportFile(fileName string) (*os.File, error) {
+func createExportFile() (*os.File, error) {
 
-	configDir, err := os.UserConfigDir()
+	csvPath, err := config.BuildExportPath()
 	if err != nil {
 		return nil, fmt.Errorf("unexpected error occured: %w", err)
 	}
 
-	csvPath := filepath.Join(configDir, "mindgo", fileName)
 	file, err := os.Create(csvPath)
 	if err != nil {
 		return nil, fmt.Errorf("unexpected error occured: %w", err)
@@ -54,7 +49,7 @@ func createExportFile(fileName string) (*os.File, error) {
 
 func ExportEntriesToCSV(entries []domain.MoodEntry) error {
 
-	file, err := createExportFile(defaultExportCSVFilePath)
+	file, err := createExportFile()
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
+
+	"github.com/MichalKrywult/mindgo/internal/config"
 )
 
 type flags struct {
@@ -12,21 +13,14 @@ type flags struct {
 	path string
 }
 
-const (
-	defaultDataFilePath = "moods.json"
-)
-
 func ParseFlags() (flags, error) {
 
 	fs := flag.NewFlagSet("moods", flag.ContinueOnError)
 	// flag.ContinueOnError won't cause program to crash if something goes wrong
 	//instead it will just throw error to handle
 
-	file := fs.String("file", defaultDataFilePath, "moods saving file name in default location")
-	path := fs.String("path", defaultDataFilePath, "full path to moods saving file")
-
-	//file := flag.String("file", defaultDataFilePath, "moods saving file name in default location")
-	//path := flag.String("path", defaultDataFilePath, "full path to moods saving file")
+	file := fs.String("file", "", "moods saving file name in default location")
+	path := fs.String("path", "", "full path to moods saving file")
 	//instead of global flags we use our own flagSet
 
 	err := fs.Parse(os.Args[1:])
@@ -62,19 +56,9 @@ func ParseFlags() (flags, error) {
 }
 
 func BuildPath(parsedFlags flags) (string, error) {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return "", err
-	}
-
 	if parsedFlags.path != "" {
 		return parsedFlags.path, nil
 	}
 
-	file := parsedFlags.file
-	if file == "" {
-		file = "moods.json"
-	}
-
-	return filepath.Join(configDir, "mindgo", file), nil
+	return config.BuildDataPath(parsedFlags.file)
 }
