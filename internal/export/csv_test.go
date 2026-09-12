@@ -46,7 +46,7 @@ func TestExportCSV(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var buf bytes.Buffer // place in the RAM memory, that pretends to be a file
-			err := ExportCSV(tt.entries, &buf)
+			err := exportCSV(tt.entries, &buf)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -63,7 +63,7 @@ func TestExportCSV(t *testing.T) {
 func TestExportCSVWriterError(t *testing.T) {
 	var buf errorWriter
 	entries := []domain.MoodEntry{{Mood: 4, Note: "Test"}}
-	err := ExportCSV(entries, &buf)
+	err := exportCSV(entries, &buf)
 	if err == nil {
 		t.Fatal("expected error for invalid writer")
 	}
