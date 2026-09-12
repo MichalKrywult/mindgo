@@ -2,11 +2,19 @@ package export
 
 import (
 	"bytes"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
 )
+
+type errorWriter struct{}
+
+func (w errorWriter) Write(p []byte) (int, error) {
+	return 0, errors.New("unexpected error")
+
+}
 
 func TestExportCSV(t *testing.T) {
 
@@ -38,12 +46,25 @@ func TestExportCSV(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var buf bytes.Buffer // place in the RAM memory, that pretends to be a file
-			ExportCSV(tt.entries, &buf)
+			err := ExportCSV(tt.entries, &buf)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
 			data := buf.String()
 			if data != tt.expected {
 				t.Errorf("expected=%v, got=%v", tt.expected, data)
 			}
 
 		})
+	}
+}
+
+func TestExportCSVWriterError(t *testing.T) {
+	var buf errorWriter
+	entries := []domain.MoodEntry{{Mood: 4, Note: "Test"}}
+	err := ExportCSV(entries, &buf)
+	if err == nil {
+		t.Fatal("expected error for invalid writer")
 	}
 }
