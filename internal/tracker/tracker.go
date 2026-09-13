@@ -71,16 +71,6 @@ func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {
 	return entries
 }
 
-/* right now this function is useless
-func (tracker *MoodTracker) findEntryByID(id int) (MoodEntry, error) {
-	for _, entry := range tracker.entries {
-		if entry.ID == id {
-			return entry, nil
-		}
-	}
-	return MoodEntry{}, fmt.Errorf("ID %d doesn't exist", id)
-}*/
-
 func (tracker *MoodTracker) findIndexByID(id int) (int, error) {
 	//again, without pointer receiver (*) because this method doesn't modify the tracker
 	for index, entry := range tracker.entries {
