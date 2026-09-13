@@ -38,6 +38,28 @@ func TestAddEntry(t *testing.T) {
 	}
 }
 
+func TestInvalidAddEntry(t *testing.T) {
+	tracker, err := NewMoodTracker(&storage.ErrorStorage{})
+	if err != nil {
+		t.Fatalf("failed to create tracker: %v", err)
+	}
+	time := time.Now()
+
+	entry := domain.MoodEntry{Mood: 2, Date: time, Note: "Test"}
+	err = tracker.AddEntry(entry)
+	if err == nil {
+		t.Fatalf("expected an error when adding an entry")
+	}
+
+	if len(tracker.entries) != 0 {
+		t.Errorf("expected tracker to be empty, got: %v instead", len(tracker.entries))
+	}
+
+	if tracker.entryID != 0 {
+		t.Errorf("expected entryID to be 0, got: %v instead", tracker.entryID)
+	}
+}
+
 func TestGetEntries(t *testing.T) {
 	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {

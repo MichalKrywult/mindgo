@@ -44,13 +44,20 @@ func NewMoodTracker(storage storage.Storage) (*MoodTracker, error) {
 }
 
 func (tracker *MoodTracker) AddEntry(entry domain.MoodEntry) error {
+	entriesBackup := make([]domain.MoodEntry, len(tracker.entries)) // we have to prepare slice with correct length
+	copy(entriesBackup, tracker.entries)                            // only then we can copy it
+
 	tracker.entryID++
 	entry.ID = tracker.entryID
+
 	tracker.entries = append(tracker.entries, entry)
 	err := tracker.save()
 	if err != nil {
+		tracker.entryID--
+		tracker.entries = entriesBackup
 		return err
 	}
+
 	return nil
 }
 
