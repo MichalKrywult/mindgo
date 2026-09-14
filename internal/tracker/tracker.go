@@ -43,6 +43,16 @@ func NewMoodTracker(storage storage.Storage) (*MoodTracker, error) {
 	}, nil
 }
 
+func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {
+	entries := make([]domain.MoodEntry, len(tracker.entries))
+	//we have to create space for that copy with make()
+	// copy() doesn't make a slice bigger
+	copy(entries, tracker.entries)
+	//now we can copy tracker.entries into entries
+
+	return entries
+}
+
 func (tracker *MoodTracker) AddEntry(entry domain.MoodEntry) error {
 	entriesBackup := make([]domain.MoodEntry, len(tracker.entries)) // we have to prepare slice with correct length
 	copy(entriesBackup, tracker.entries)                            // only then we can copy it
@@ -61,67 +71,18 @@ func (tracker *MoodTracker) AddEntry(entry domain.MoodEntry) error {
 	return nil
 }
 
-func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {
-	entries := make([]domain.MoodEntry, len(tracker.entries))
-	//we have to create space for that copy with make()
-	// copy() doesn't make a slice bigger
-	copy(entries, tracker.entries)
-	//now we can copy tracker.entries into entries
-
-	return entries
-}
-
-func (tracker *MoodTracker) findIndexByID(id int) (int, error) {
-	//again, without pointer receiver (*) because this method doesn't modify the tracker
-	for index, entry := range tracker.entries {
-		if entry.ID == id {
-			return index, nil
-		}
-	}
-	return -1, fmt.Errorf("ID %d doesn't exist", id)
-}
-
-func (tracker *MoodTracker) removeEntryByID(id int) error {
-	index, err := tracker.findIndexByID(id)
-	if err != nil {
-		return err
-	}
-
-	tracker.entries = append(tracker.entries[:index], tracker.entries[index+1:]...)
-	// append(slice, element)
-	// ... separates slice into separate arguments
-	err = tracker.save()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (tracker *MoodTracker) editEntryByID(id int, entry domain.MoodEntry) error {
-	index, err := tracker.findIndexByID(id)
-	if err != nil {
-		return err
-	}
-
-	entry.ID = id
-	tracker.entries[index] = entry
-
-	err = tracker.save()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (tracker *MoodTracker) EditEntryByIndex(index int, entry domain.MoodEntry) error {
 	if index < 0 || index >= len(tracker.entries) {
-		return fmt.Errorf("Invalid entry number")
+		return fmt.Errorf("invalid entry number")
 	}
 
-	id := tracker.entries[index].ID
+	backupEntry := tracker.entries[index]
 
-	err := tracker.editEntryByID(id, entry)
-	if err != nil {
+	entry.ID = backupEntry.ID
+	tracker.entries[index] = entry
+
+	if err := tracker.save(); err != nil {
+		tracker.entries[index] = backupEntry
 		return err
 	}
 
@@ -130,13 +91,19 @@ func (tracker *MoodTracker) EditEntryByIndex(index int, entry domain.MoodEntry) 
 
 func (tracker *MoodTracker) RemoveEntryByIndex(index int) error {
 	if index < 0 || index >= len(tracker.entries) {
-		return fmt.Errorf("Invalid entry number")
+		return fmt.Errorf("invalid entry number")
 	}
 
-	id := tracker.entries[index].ID
+	entriesBackup := make([]domain.MoodEntry, len(tracker.entries))
+	copy(entriesBackup, tracker.entries)
 
-	err := tracker.removeEntryByID(id)
-	if err != nil {
+	tracker.entries = append(
+		tracker.entries[:index],
+		tracker.entries[index+1:]...,
+	)
+
+	if err := tracker.save(); err != nil {
+		tracker.entries = entriesBackup
 		return err
 	}
 
