@@ -69,7 +69,7 @@ func (cli *CLI) hasEntries() bool {
 	return len(cli.tracker.GetEntries()) > 0
 }
 
-func (cli *CLI) IsIndexValid(index int) bool {
+func (cli *CLI) isIndexValid(index int) bool {
 	return index >= 0 && index < len(cli.tracker.GetEntries())
 }
 
@@ -111,6 +111,147 @@ func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
 	return domain.NewMoodEntry(mood, time.Now(), note)
 }
 
+func (cli *CLI) handleAddEntry() error {
+
+	entry, err := cli.readNewMoodEntry()
+	if err != nil {
+		return fmt.Errorf("Something went wrong: %v", err)
+	}
+
+	err = cli.tracker.AddEntry(entry)
+	if err != nil {
+		return fmt.Errorf("Unexpected error occured: %v", err)
+	}
+	return nil
+}
+
+func (cli *CLI) handleEditEntry() error {
+	if !cli.hasEntries() {
+		return fmt.Errorf("You don't have any entries")
+	}
+
+	fmt.Println("Which entry would you like to edit?")
+	cli.displayAllEntries()
+
+	fmt.Println("Number of entry to edit:")
+	choice, err := cli.readInt()
+	if err != nil {
+		return fmt.Errorf("Invalid entry")
+	}
+	index := choice - 1
+
+	if !cli.isIndexValid(index) {
+		return fmt.Errorf("Invalid entry number")
+	}
+
+	entry, err := cli.readNewMoodEntry()
+	if err != nil {
+		return fmt.Errorf("Something went wrong with adding new entry: %v", err)
+	}
+
+	err = cli.tracker.EditEntryByIndex(index, entry)
+	if err != nil {
+		return fmt.Errorf("Something went wrong with editing entry: %v\n", err)
+	}
+
+	return nil
+}
+
+func (cli *CLI) handleRemoveEntry() error {
+
+	if !cli.hasEntries() {
+		return fmt.Errorf("You don't have any entries")
+	}
+
+	fmt.Println("Which entry would you like to delete?")
+	cli.displayAllEntries()
+
+	fmt.Println("Number of entry to delete:")
+	choice, err := cli.readInt()
+	if err != nil {
+		return fmt.Errorf("Invalid entry")
+
+	}
+	index := choice - 1
+
+	if !cli.isIndexValid(index) {
+		return fmt.Errorf("Invalid entry number")
+	}
+
+	err = cli.tracker.RemoveEntryByIndex(index)
+	if err != nil {
+		return fmt.Errorf("Something went wrong with removing entry: %v", err)
+
+	}
+
+	return nil
+}
+
+func (cli *CLI) handleDisplayingStatistics() error {
+	entries := cli.tracker.GetEntries()
+	statsData, err := stats.CalculateStats(entries)
+	if err != nil {
+		return fmt.Errorf("Something went wrong: %v", err)
+
+	}
+
+	fmt.Printf("Total count: %d\n", statsData.Summary.TotalCount)
+	fmt.Printf("Average: %.2f (Min: %d, Max: %d)\n",
+		statsData.Summary.Average,
+		statsData.Summary.MinMood,
+		statsData.Summary.MaxMood)
+
+	fmt.Println("Histogram:")
+	histogram, err := stats.RenderHistogram(
+		statsData.Dist,
+		domain.MinMoodValue,
+		domain.MaxMoodValue)
+
+	if err != nil {
+		return fmt.Errorf("Something went wrong: %v", err)
+	}
+
+	fmt.Print(histogram)
+
+	fmt.Println("Average mood for each day:")
+	statsByDay := stats.CalculateStatsByWeekday(entries)
+	days := []time.Weekday{ //for some reason days in Go start from Sunday,
+		//so it's needed to create slice of days
+		time.Monday,
+		time.Tuesday,
+		time.Wednesday,
+		time.Thursday,
+		time.Friday,
+		time.Saturday,
+		time.Sunday,
+	}
+
+	for _, day := range days {
+		average, exists := statsByDay[day]
+
+		if !exists {
+			fmt.Printf("%s: N/A\n", day)
+			continue
+		}
+
+		fmt.Printf("%s: %.2f\n", day, average)
+	}
+	return nil
+}
+
+func (cli *CLI) handleExport() error {
+
+	entries := cli.tracker.GetEntries()
+
+	err := export.ExportEntriesToCSV(entries)
+	if err != nil {
+		return fmt.Errorf("Unexpected error occured: %v", err)
+
+	}
+
+	return nil
+}
+
 func (cli *CLI) Show() {
 	for {
 		choice, err := cli.displayMenuAndReadChoice()
@@ -125,148 +266,51 @@ func (cli *CLI) Show() {
 
 		switch choice {
 		case 1:
-			entry, err := cli.readNewMoodEntry()
+			err := cli.handleAddEntry()
 			if err != nil {
-				fmt.Println("Something went wrong:", err)
+				fmt.Println(err)
 				continue
 			}
 
-			err = cli.tracker.AddEntry(entry)
-			if err != nil {
-				fmt.Println("Unexpected error occured:", err)
-				continue
-			}
 			fmt.Println("Entry added!")
-
 		case 2:
-			if !cli.hasEntries() {
-				fmt.Println("You don't have any entries")
-				continue
-			}
-
-			fmt.Println("Which entry would you like to edit?")
-			cli.displayAllEntries()
-
-			fmt.Println("Number of entry to edit:")
-			choice, err := cli.readInt()
+			err := cli.handleEditEntry()
 			if err != nil {
-				fmt.Println("Invalid entry")
-				continue
-			}
-			index := choice - 1
-
-			if !cli.IsIndexValid(index) {
-				fmt.Println("Invalid entry number")
+				fmt.Println(err)
 				continue
 			}
 
-			entry, err := cli.readNewMoodEntry()
-			if err != nil {
-				fmt.Printf("Something went wrong with adding new entry: %v", err)
-				continue
-			}
-
-			err = cli.tracker.EditEntryByIndex(index, entry)
-			if err != nil {
-				fmt.Printf("Something went wrong with editing entry: %v\n", err)
-				continue
-			}
-
+			fmt.Println("Entry edited!")
 		case 3:
-			if !cli.hasEntries() {
-				fmt.Println("You don't have any entries")
-				continue
-			}
-
-			fmt.Println("Which entry would you like to delete?")
-			cli.displayAllEntries()
-
-			fmt.Println("Number of entry to delete:")
-			choice, err := cli.readInt()
+			err := cli.handleRemoveEntry()
 			if err != nil {
-				fmt.Println("Invalid entry")
-				continue
-			}
-			index := choice - 1
-
-			if !cli.IsIndexValid(index) {
-				fmt.Println("Invalid entry number")
+				fmt.Println(err)
 				continue
 			}
 
-			err = cli.tracker.RemoveEntryByIndex(index)
-			if err != nil {
-				fmt.Println("Something went wrong with removing entry:", err)
-				continue
-			}
-
+			fmt.Println("Entry removed!")
 		case 4:
 			cli.displayAllEntries()
 
 		case 5:
-			entries := cli.tracker.GetEntries()
-			statsData, err := stats.CalculateStats(entries)
+			err := cli.handleDisplayingStatistics()
 			if err != nil {
-				fmt.Println("Something went wrong:", err)
+				fmt.Println(err)
 				continue
 			}
 
-			fmt.Printf("Total count: %d\n", statsData.Summary.TotalCount)
-			fmt.Printf("Average: %.2f (Min: %d, Max: %d)\n",
-				statsData.Summary.Average,
-				statsData.Summary.MinMood,
-				statsData.Summary.MaxMood)
-
-			fmt.Println("Histogram:")
-			histogram, err := stats.RenderHistogram(
-				statsData.Dist,
-				domain.MinMoodValue,
-				domain.MaxMoodValue)
-
-			if err != nil {
-				fmt.Println("Something went wrong:", err)
-			}
-
-			fmt.Print(histogram)
-
-			fmt.Println("Average mood for each day:")
-			statsByDay := stats.CalculateStatsByWeekday(entries)
-			days := []time.Weekday{ //for some reason days in Go start from Sunday,
-				//so it's needed to create slice of days
-				time.Monday,
-				time.Tuesday,
-				time.Wednesday,
-				time.Thursday,
-				time.Friday,
-				time.Saturday,
-				time.Sunday,
-			}
-
-			for _, day := range days {
-				average, exists := statsByDay[day]
-
-				if !exists {
-					fmt.Printf("%s: N/A\n", day)
-					continue
-				}
-
-				fmt.Printf("%s: %.2f\n", day, average)
-			}
-
+			fmt.Println("Statistics displayed!")
 		case 6:
-			entries := cli.tracker.GetEntries()
-
-			err := export.ExportEntriesToCSV(entries)
+			err := cli.handleExport()
 			if err != nil {
-				fmt.Printf("Unexpected error occured: %v", err)
+				fmt.Println(err)
 				continue
 			}
-			fmt.Println("Entries exported succesfully")
 
+			fmt.Println("Entries exported succesfully")
 		case 0:
 			fmt.Println("Exit")
 			return
-
 		default:
 			fmt.Println("Invalid choice")
 		}
