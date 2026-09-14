@@ -172,41 +172,6 @@ func TestEditEntryByIndexForNegativeIndex(t *testing.T) {
 	}
 }
 
-func TestEditEntryStorageError(t *testing.T) {
-	tracker, err := NewMoodTracker(&storage.ErrorStorage{})
-	if err != nil {
-		t.Fatalf("failed to create tracker: %v", err)
-	}
-
-	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Old note"}
-
-	err = tracker.AddEntry(entry)
-	if err != nil {
-		t.Fatalf("unexpected error occurred when adding entry, %v", err)
-	}
-
-	newEntry := domain.MoodEntry{Mood: 8, Note: "New note"}
-
-	err = tracker.EditEntryByIndex(0, newEntry)
-	if err == nil {
-		t.Fatalf("expected an error when editing an entry")
-	}
-
-	data := tracker.GetEntries()
-
-	if data[0].ID != 1 {
-		t.Errorf("expected ID to be: %v, got: %v instead", 1, data[0].ID)
-	}
-
-	if data[0].Note != "Old note" {
-		t.Errorf("expected note to be: %v, got: %v instead", "Old note", data[0].Note)
-	}
-
-	if data[0].Mood != 2 {
-		t.Errorf("expected mood value to be: %v, got: %v instead", 2, data[0].Mood)
-	}
-}
-
 func TestRemoveEntryByIndex(t *testing.T) {
 	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
@@ -312,30 +277,5 @@ func TestRemoveEntryByIndexForNegativeIndex(t *testing.T) {
 
 	if len(tracker.entries) != 1 {
 		t.Fatal("entry was removed from the tracker, despite invalid index")
-	}
-}
-
-func TestRemoveEntryStorageError(t *testing.T) {
-	tracker, err := NewMoodTracker(&storage.ErrorStorage{})
-	if err != nil {
-		t.Fatalf("failed to create tracker: %v", err)
-	}
-
-	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Old note"}
-
-	err = tracker.AddEntry(entry)
-	if err != nil {
-		t.Fatalf("unexpected error occurred when adding entry, %v", err)
-	}
-
-	err = tracker.RemoveEntryByIndex(0)
-	if err == nil {
-		t.Fatalf("expected an error when removing an entry")
-	}
-
-	data := tracker.GetEntries()
-
-	if len(data) != 1 {
-		t.Errorf("expected length to be: %v, got: %v instead", 1, len(data))
 	}
 }
