@@ -43,6 +43,13 @@ func NewMoodTracker(storage storage.Storage) (*MoodTracker, error) {
 	}, nil
 }
 
+func (tracker *MoodTracker) validateIndex(index int) error {
+	if index < 0 || index >= len(tracker.entries) {
+		return fmt.Errorf("invalid entry number")
+	}
+	return nil
+}
+
 func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {
 	entries := make([]domain.MoodEntry, len(tracker.entries))
 	//we have to create space for that copy with make()
@@ -72,8 +79,8 @@ func (tracker *MoodTracker) AddEntry(entry domain.MoodEntry) error {
 }
 
 func (tracker *MoodTracker) EditEntryByIndex(index int, entry domain.MoodEntry) error {
-	if index < 0 || index >= len(tracker.entries) {
-		return fmt.Errorf("invalid entry number")
+	if err := tracker.validateIndex(index); err != nil {
+		return err
 	}
 
 	backupEntry := tracker.entries[index]
@@ -90,8 +97,8 @@ func (tracker *MoodTracker) EditEntryByIndex(index int, entry domain.MoodEntry) 
 }
 
 func (tracker *MoodTracker) RemoveEntryByIndex(index int) error {
-	if index < 0 || index >= len(tracker.entries) {
-		return fmt.Errorf("invalid entry number")
+	if err := tracker.validateIndex(index); err != nil {
+		return err
 	}
 
 	entriesBackup := make([]domain.MoodEntry, len(tracker.entries))
