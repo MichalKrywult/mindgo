@@ -29,7 +29,7 @@ func main() {
 	config := app.Config{DataPath: dataPath}
 	err = app.Run(config)
 	if err != nil {
-		fmt.Println("Error with path building:", err)
+		fmt.Println("Error starting apllication:", err)
 		return
 	}
 }

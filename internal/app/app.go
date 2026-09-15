@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -17,14 +16,12 @@ type Config struct {
 func Run(config Config) error {
 
 	if err := os.MkdirAll(filepath.Dir(config.DataPath), 0755); err != nil {
-		fmt.Println("Error creating data directory:", err)
 		return err
 	}
 
 	fileStorage := storage.FileStorage{Filename: config.DataPath}
 	moodTracker, err := tracker.NewMoodTracker(&fileStorage)
 	if err != nil {
-		fmt.Println("Error initializing tracker:", err)
 		return err
 	}
 
