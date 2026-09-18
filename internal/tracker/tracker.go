@@ -20,6 +20,24 @@ type MoodTracker struct {
 	storage.Storage
 }
 
+type BackupMoodTracker struct {
+	entries []domain.MoodEntry
+	entryID int
+}
+
+func (tracker *MoodTracker) createTrackerBackup() BackupMoodTracker {
+	backupEntries := make([]domain.MoodEntry, len(tracker.entries))
+	copy(backupEntries, tracker.entries)
+
+	backupEntryID := tracker.entryID
+	return BackupMoodTracker{entries: backupEntries, entryID: backupEntryID}
+}
+
+func (tracker *MoodTracker) restoreTrackerFromBackup(backup BackupMoodTracker) {
+	tracker.entries = backup.entries
+	tracker.entryID = backup.entryID
+}
+
 func NewMoodTracker(storage storage.Storage) (*MoodTracker, error) {
 	// read data from the file
 	entries, err := storage.Load()
