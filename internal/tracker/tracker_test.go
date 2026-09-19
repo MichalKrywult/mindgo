@@ -279,3 +279,66 @@ func TestRemoveEntryByIndexForNegativeIndex(t *testing.T) {
 		t.Fatal("entry was removed from the tracker, despite invalid index")
 	}
 }
+
+func TestCreatingTrackerBackup(t *testing.T) {
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
+	if err != nil {
+		t.Fatalf("failed to create tracker: %v", err)
+	}
+
+	entry := domain.MoodEntry{Mood: 8, Note: "Test"}
+	entry2 := domain.MoodEntry{Mood: 2, Note: "Test2"}
+
+	tracker.AddEntry(entry)
+
+	backup := tracker.createTrackerBackup()
+	tracker.EditEntryByIndex(1, entry2)
+	tracker.AddEntry(entry2)
+
+	if backup.entries[0].Mood != 8 {
+		t.Errorf("expected mood %d, got %d", 8, backup.entries[0].Mood)
+	}
+
+	if backup.entries[0].Note != "Test" {
+		t.Errorf("expected note %q, got %q", "Test", backup.entries[0].Note)
+	}
+
+	if backup.entryID != 1 {
+		t.Errorf("expected entryID %d, got %d", 1, backup.entryID)
+	}
+}
+
+func TestRestoringTrackerBackup(t *testing.T) {
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
+	if err != nil {
+		t.Fatalf("failed to create tracker: %v", err)
+	}
+
+	entry := domain.MoodEntry{Mood: 8, Note: "Test"}
+	entry2 := domain.MoodEntry{Mood: 2, Note: "Test2"}
+
+	tracker.AddEntry(entry)
+
+	backup := tracker.createTrackerBackup()
+
+	tracker.EditEntryByIndex(1, entry2)
+	tracker.AddEntry(entry2)
+
+	tracker.restoreTrackerFromBackup(backup)
+
+	if len(tracker.entries) != 1 {
+		t.Errorf("expected entries length %d, got %d", 1, len(tracker.entries))
+	}
+
+	if tracker.entries[0].Mood != 8 {
+		t.Errorf("expected mood %d, got %d", 8, tracker.entries[0].Mood)
+	}
+
+	if tracker.entries[0].Note != "Test" {
+		t.Errorf("expected note %q, got %q", "Test", tracker.entries[0].Note)
+	}
+
+	if tracker.entryID != 1 {
+		t.Errorf("expected entryID %d, got %d", 1, tracker.entryID)
+	}
+}
