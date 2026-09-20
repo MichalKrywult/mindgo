@@ -47,7 +47,6 @@ func createExportFile() (*os.File, error) {
 	return file, nil
 }
 
-
 func ExportEntriesToCSV(entries []domain.MoodEntry) error {
 	file, err := createExportFile()
 	if err != nil {
