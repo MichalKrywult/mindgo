@@ -31,7 +31,10 @@ The **mindgo** directory is created automatically when the application starts.
 ├── domain/ # Core domain models
 ├── stats/ # Statistics and calculations
 ├── storage/ # Data persistence
-└── tracker/ # Mood tracking logic
+├── tracker/ # Mood tracking logic
+└── app # Accessing storage and creating tracker
+
+─── main.go # Loading the config passed to the app
 ```
 
 ## Planned features
