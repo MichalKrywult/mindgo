@@ -8,7 +8,7 @@ import (
 )
 
 func (tracker *MoodTracker) save() error {
-	if err := tracker.Storage.Save(tracker.entries); err != nil {
+	if err := tracker.Save(tracker.entries); err != nil {
 		return fmt.Errorf("unexpected error occurred when saving to file: %w", err)
 	}
 	return nil
@@ -18,6 +18,24 @@ type MoodTracker struct {
 	entries []domain.MoodEntry
 	entryID int
 	storage.Storage
+}
+
+type backupMoodTracker struct {
+	entries []domain.MoodEntry
+	entryID int
+}
+
+func (tracker *MoodTracker) createTrackerBackup() backupMoodTracker {
+	backupEntries := make([]domain.MoodEntry, len(tracker.entries))
+	copy(backupEntries, tracker.entries)
+
+	backupEntryID := tracker.entryID
+	return backupMoodTracker{entries: backupEntries, entryID: backupEntryID}
+}
+
+func (tracker *MoodTracker) restoreTrackerFromBackup(backup backupMoodTracker) {
+	tracker.entries = backup.entries
+	tracker.entryID = backup.entryID
 }
 
 func NewMoodTracker(storage storage.Storage) (*MoodTracker, error) {
@@ -61,8 +79,8 @@ func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {
 }
 
 func (tracker *MoodTracker) AddEntry(entry domain.MoodEntry) error {
-	entriesBackup := make([]domain.MoodEntry, len(tracker.entries)) // we have to prepare slice with correct length
-	copy(entriesBackup, tracker.entries)                            // only then we can copy it
+
+	backup := tracker.createTrackerBackup()
 
 	tracker.entryID++
 	entry.ID = tracker.entryID
@@ -70,26 +88,26 @@ func (tracker *MoodTracker) AddEntry(entry domain.MoodEntry) error {
 	tracker.entries = append(tracker.entries, entry)
 	err := tracker.save()
 	if err != nil {
-		tracker.entryID--
-		tracker.entries = entriesBackup
+		tracker.restoreTrackerFromBackup(backup)
 		return err
 	}
 
 	return nil
 }
 
-func (tracker *MoodTracker) EditEntryByIndex(index int, entry domain.MoodEntry) error {
+func (tracker *MoodTracker) EditEntryByIndex(index int, newEntry domain.MoodEntry) error {
 	if err := tracker.validateIndex(index); err != nil {
 		return err
 	}
 
-	backupEntry := tracker.entries[index]
+	backup := tracker.createTrackerBackup()
 
-	entry.ID = backupEntry.ID
-	tracker.entries[index] = entry
+	oldEntry := tracker.entries[index]
+	newEntry.ID = oldEntry.ID
+	tracker.entries[index] = newEntry
 
 	if err := tracker.save(); err != nil {
-		tracker.entries[index] = backupEntry
+		tracker.restoreTrackerFromBackup(backup)
 		return err
 	}
 
@@ -101,8 +119,7 @@ func (tracker *MoodTracker) RemoveEntryByIndex(index int) error {
 		return err
 	}
 
-	entriesBackup := make([]domain.MoodEntry, len(tracker.entries))
-	copy(entriesBackup, tracker.entries)
+	backup := tracker.createTrackerBackup()
 
 	tracker.entries = append(
 		tracker.entries[:index],
@@ -110,7 +127,7 @@ func (tracker *MoodTracker) RemoveEntryByIndex(index int) error {
 	)
 
 	if err := tracker.save(); err != nil {
-		tracker.entries = entriesBackup
+		tracker.restoreTrackerFromBackup(backup)
 		return err
 	}
 
