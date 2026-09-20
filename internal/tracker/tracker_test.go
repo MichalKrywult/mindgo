@@ -113,11 +113,7 @@ func TestEditEntryByIndex(t *testing.T) {
 		t.Fatalf("unexpected error occurred when adding entry, %v", err)
 	}
 
-	newEntry := domain.MoodEntry{
-		Mood: 8,
-		Date: time.Now(),
-		Note: "New",
-	}
+	newEntry := domain.MoodEntry{Mood: 8, Note: "New"}
 
 	err = tracker.EditEntryByIndex(0, newEntry)
 	if err != nil {
@@ -169,6 +165,37 @@ func TestEditEntryByIndexForNegativeIndex(t *testing.T) {
 	err = tracker.EditEntryByIndex(-1, entry)
 	if err == nil {
 		t.Fatal("expected error for negative index")
+	}
+}
+
+func TestEditEntryByIndexStorageError(t *testing.T) {
+	tracker, err := NewMoodTracker(&storage.ErrorStorage{})
+	if err != nil {
+		t.Fatalf("failed to create tracker: %v", err)
+	}
+
+	entry := domain.MoodEntry{Mood: 2, Note: "Original"}
+
+	tracker.entries = []domain.MoodEntry{entry}
+	tracker.entryID = 0
+
+	newEntry := domain.MoodEntry{Mood: 5, Note: "Edited"}
+
+	err = tracker.EditEntryByIndex(0, newEntry)
+	if err == nil {
+		t.Fatalf("expected an error when editing an entry")
+	}
+
+	if len(tracker.entries) != 1 {
+		t.Errorf("expected tracker to contain 1 entry, got: %v instead", len(tracker.entries))
+	}
+
+	if tracker.entries[0] != entry {
+		t.Errorf("expected original entry to be restored, got: %v instead", tracker.entries[0])
+	}
+
+	if tracker.entryID != entry.ID {
+		t.Errorf("expected entryID to be %v, got: %v instead", entry.ID, tracker.entryID)
 	}
 }
 
@@ -289,11 +316,22 @@ func TestCreatingTrackerBackup(t *testing.T) {
 	entry := domain.MoodEntry{Mood: 8, Note: "Test"}
 	entry2 := domain.MoodEntry{Mood: 2, Note: "Test2"}
 
-	tracker.AddEntry(entry)
+	err = tracker.AddEntry(entry)
+	if err != nil {
+		t.Fatalf("unexpected error occurred when adding entry, %v", err)
+	}
 
 	backup := tracker.createTrackerBackup()
-	tracker.EditEntryByIndex(1, entry2)
-	tracker.AddEntry(entry2)
+
+	err = tracker.EditEntryByIndex(1, entry2)
+	if err != nil {
+		t.Fatalf("unexpected error occurred when adding entry, %v", err)
+	}
+
+	err = tracker.AddEntry(entry2)
+	if err != nil {
+		t.Fatalf("unexpected error occurred when adding entry, %v", err)
+	}
 
 	if backup.entries[0].Mood != 8 {
 		t.Errorf("expected mood %d, got %d", 8, backup.entries[0].Mood)
@@ -317,12 +355,22 @@ func TestRestoringTrackerBackup(t *testing.T) {
 	entry := domain.MoodEntry{Mood: 8, Note: "Test"}
 	entry2 := domain.MoodEntry{Mood: 2, Note: "Test2"}
 
-	tracker.AddEntry(entry)
+	err = tracker.AddEntry(entry)
+	if err != nil {
+		t.Fatalf("unexpected error occurred when adding entry, %v", err)
+	}
 
 	backup := tracker.createTrackerBackup()
 
-	tracker.EditEntryByIndex(1, entry2)
-	tracker.AddEntry(entry2)
+	err = tracker.EditEntryByIndex(1, entry2)
+	if err != nil {
+		t.Fatalf("unexpected error occurred when adding entry, %v", err)
+	}
+
+	err = tracker.AddEntry(entry2)
+	if err != nil {
+		t.Fatalf("unexpected error occurred when adding entry, %v", err)
+	}
 
 	tracker.restoreTrackerFromBackup(backup)
 
@@ -340,5 +388,34 @@ func TestRestoringTrackerBackup(t *testing.T) {
 
 	if tracker.entryID != 1 {
 		t.Errorf("expected entryID %d, got %d", 1, tracker.entryID)
+	}
+}
+
+func TestRemoveEntryByIndexStorageError(t *testing.T) {
+	tracker, err := NewMoodTracker(&storage.ErrorStorage{})
+	if err != nil {
+		t.Fatalf("failed to create tracker: %v", err)
+	}
+
+	entry := domain.MoodEntry{Mood: 2, Note: "Test"}
+
+	tracker.entries = []domain.MoodEntry{entry}
+	tracker.entryID = 0
+
+	err = tracker.RemoveEntryByIndex(0)
+	if err == nil {
+		t.Fatalf("expected an error when removing an entry")
+	}
+
+	if len(tracker.entries) != 1 {
+		t.Errorf("expected tracker to contain 1 entry, got: %v instead", len(tracker.entries))
+	}
+
+	if tracker.entries[0] != entry {
+		t.Errorf("expected original entry to be restored, got: %v instead", tracker.entries[0])
+	}
+
+	if tracker.entryID != entry.ID {
+		t.Errorf("expected entryID to be %v, got: %v instead", entry.ID, tracker.entryID)
 	}
 }
