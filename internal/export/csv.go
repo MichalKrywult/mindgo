@@ -47,18 +47,22 @@ func createExportFile() (*os.File, error) {
 	return file, nil
 }
 
-func ExportEntriesToCSV(entries []domain.MoodEntry) error {
 
+func ExportEntriesToCSV(entries []domain.MoodEntry) error {
 	file, err := createExportFile()
 	if err != nil {
 		return err
 	}
 
-	defer file.Close()
+	exportErr := exportCSV(entries, file)
+	closeErr := file.Close()
 
-	err = exportCSV(entries, file)
-	if err != nil {
-		return err
+	if exportErr != nil {
+		return exportErr
+	}
+
+	if closeErr != nil {
+		return closeErr
 	}
 
 	return nil
