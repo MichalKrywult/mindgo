@@ -65,7 +65,7 @@ func RenderHistogram(dist map[int]int, minScale, maxScale int) (string, error) {
 		count := dist[mood]
 		bars := strings.Repeat("█", count)
 
-		builder.WriteString(fmt.Sprintf("%2d | %s (%d)\n", mood, bars, count))
+		fmt.Fprintf(&builder, "%2d | %s (%d)\n", mood, bars, count)
 		//%2d means that the length of d is 2 digits long - ' 3, '10' etc
 	}
 
