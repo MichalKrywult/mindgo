@@ -8,7 +8,7 @@ import (
 )
 
 func (tracker *MoodTracker) save() error {
-	if err := tracker.Storage.Save(tracker.entries); err != nil {
+	if err := tracker.Save(tracker.entries); err != nil {
 		return fmt.Errorf("unexpected error occurred when saving to file: %w", err)
 	}
 	return nil
