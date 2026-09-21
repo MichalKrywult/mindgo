@@ -105,3 +105,88 @@ func TestBuildConfigPath(t *testing.T) {
 		})
 	}
 }
+
+func TestEnsureConfigFile(t *testing.T) {
+	t.Run("creates config file when it does not exist", func(t *testing.T) {
+		dir := t.TempDir()
+		configPath := filepath.Join(dir, "config", "config.json")
+
+		err := EnsureConfigFile(configPath)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		data, err := os.ReadFile(configPath)
+		if err != nil {
+			t.Fatalf("failed to read created config: %v", err)
+		}
+
+		if string(data) != defaultConfig {
+			t.Errorf("config content = %q, expected %q", string(data), defaultConfig)
+		}
+	})
+
+	t.Run("does nothing when config already exists", func(t *testing.T) {
+		dir := t.TempDir()
+		configPath := filepath.Join(dir, "config.json")
+
+		original := `{"dataPath":"moods.json"}`
+
+		err := os.WriteFile(configPath, []byte(original), 0644)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = EnsureConfigFile(configPath)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		data, err := os.ReadFile(configPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(data) != original {
+			t.Errorf("file was modified: got %q, expected %q", string(data), original)
+		}
+	})
+}
+
+func TestLoadConfigFromFile(t *testing.T) {
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "config.json")
+
+	content := `{"dataPath":"moods.json"}`
+
+	err := os.WriteFile(configPath, []byte(content), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	config, err := LoadConfigFromFile(configPath)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if config.DataPath != "moods.json" {
+		t.Errorf("expected DataPath to be: %v, got: %v", "moods.json", config.DataPath)
+	}
+}
+
+func TestLoadConfigFromInvalidFile(t *testing.T) {
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "config.json")
+
+	content := `{"invalid"___json1`
+
+	err := os.WriteFile(configPath, []byte(content), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = LoadConfigFromFile(configPath)
+	if err == nil {
+		t.Fatalf("expected error for invalid json")
+	}
+}
