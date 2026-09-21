@@ -71,7 +71,37 @@ func TestBuildExportPath(t *testing.T) {
 			if fullPath != tt.expectedPath {
 				t.Errorf("expected path: %s, received path: %s", tt.expectedPath, fullPath)
 			}
+		})
+	}
+}
 
+func TestBuildConfigPath(t *testing.T) {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		t.Fatalf("failed to get user config directory: %v", err)
+	}
+
+	tests := []struct {
+		name         string
+		expectedPath string
+	}{
+		{
+			name:         "default file",
+			expectedPath: filepath.Join(configDir, appDirectoryName, defaultConfigFileName),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fullPath, err := BuildConfigPath()
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+
+			}
+
+			if fullPath != tt.expectedPath {
+				t.Errorf("expected path: %s, received path: %s", tt.expectedPath, fullPath)
+			}
 		})
 	}
 }
