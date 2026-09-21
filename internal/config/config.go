@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -12,16 +13,15 @@ const (
 	defaultExportFileName = "moods.csv"
 	appDirectoryName      = "mindgo"
 
-	defaultConfig = `{"configPath":"moods.json"}`
+	defaultConfig = `{"dataPath":"moods.json"}`
 )
 
-func EnsureConfigFile() error {
-	configPath, err := buildPath("", defaultConfigFileName)
-	if err != nil {
-		return fmt.Errorf("failed to get user config directory: %w", err)
-	}
+type Config struct {
+	DataPath string `json:"dataPath"`
+}
 
-	_, err = os.ReadFile(configPath)
+func EnsureConfigFile(configPath string) error {
+	_, err := os.Stat(configPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(filepath.Dir(configPath), 0755)
@@ -42,6 +42,21 @@ func EnsureConfigFile() error {
 	return nil
 }
 
+func LoadConfigFromFile(configPath string) (Config, error) {
+
+	data, err := os.ReadFile(configPath) //the path is aready ensured
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to read file %s: %w", configPath, err)
+	}
+
+	var config Config
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to unmarshal config from %s: %w", configPath, err)
+	}
+
+	return config, nil
+}
 
 func buildPath(file, defaultFileName string) (string, error) {
 	configDir, err := os.UserConfigDir()
@@ -66,4 +81,8 @@ func BuildDataPath(file string) (string, error) {
 
 func BuildExportPath() (string, error) {
 	return buildPath("", defaultExportFileName)
+}
+
+func BuildConfigPath() (string, error) {
+	return buildPath("", defaultConfigFileName)
 }

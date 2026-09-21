@@ -6,6 +6,7 @@ import (
 
 	"github.com/MichalKrywult/mindgo/internal/app"
 	"github.com/MichalKrywult/mindgo/internal/cli"
+	"github.com/MichalKrywult/mindgo/internal/config"
 )
 
 func main() {
@@ -26,7 +27,7 @@ func main() {
 		return
 	}
 
-	config := app.Config{DataPath: dataPath}
+	config := config.Config{DataPath: dataPath}
 	err = app.Run(config)
 	if err != nil {
 		fmt.Println("Error starting apllication:", err)
