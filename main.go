@@ -23,7 +23,7 @@ func main() {
 		return
 	}
 
-	conf, err := config.LoadConfigFromFile(configPath)
+	oldConf, err := config.LoadConfigFromFile(configPath)
 	if err != nil {
 		fmt.Println("Error with loading from ConfigFile:", err)
 		return
@@ -39,13 +39,22 @@ func main() {
 		return
 	}
 
-	dataPath, err := cli.SelectDataPath(parsedFlags, conf)
+	dataPath, err := cli.SelectDataPath(parsedFlags, oldConf)
 	if err != nil {
 		fmt.Println("Error with path building:", err)
 		return
 	}
 
-	err = app.Run(config.Config{DataPath: dataPath})
+	newConf := config.Config{DataPath: dataPath}
+	if oldConf != newConf {
+		err = config.SaveConfigToFile(configPath, newConf)
+		if err != nil {
+			fmt.Println("Error with saving config to file:", err)
+			return
+		}
+	}
+
+	err = app.Run(newConf)
 	if err != nil {
 		fmt.Println("Error starting apllication:", err)
 		return
