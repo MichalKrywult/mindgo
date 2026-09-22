@@ -1,10 +1,12 @@
 package cli
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/MichalKrywult/mindgo/internal/config"
 	"github.com/MichalKrywult/mindgo/internal/domain"
 	"github.com/MichalKrywult/mindgo/internal/storage"
 	"github.com/MichalKrywult/mindgo/internal/tracker"
@@ -147,5 +149,41 @@ func TestCLI(t *testing.T) {
 				t.Errorf("expected note %q, got %q", tt.expectedNote, entries[0].Note)
 			}
 		})
+	}
+}
+
+func TestPersistentDataPath(t *testing.T) {
+
+	//first run
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "config.json")
+
+	parsedFlags := flags{path: filepath.Join(dir, "path.json")}
+	conf := config.Config{}
+
+	correctPath, err := SelectDataPath(parsedFlags, conf)
+	if err != nil {
+		t.Fatalf("failed to select path: %v", err)
+	}
+
+	conf.DataPath = correctPath
+	err = config.SaveConfigToFile(configPath, conf)
+	if err != nil {
+		t.Fatalf("failed to save config: %v", err)
+	}
+
+	//second run
+	newConf, err := config.LoadConfigFromFile(configPath)
+	if err != nil {
+		t.Fatalf("failed to load config: %v", err)
+	}
+
+	loadedPath, err := SelectDataPath(flags{}, newConf)
+	if err != nil {
+		t.Fatalf("failed to select path: %v", err)
+	}
+
+	if loadedPath != correctPath {
+		t.Fatalf("paths are not equal, got: %v, wanted: %v", loadedPath, correctPath)
 	}
 }

@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/MichalKrywult/mindgo/internal/config"
 )
 
 func TestParseFlags(t *testing.T) {
@@ -65,12 +67,13 @@ func TestParseFlags(t *testing.T) {
 	}
 }
 
-func TestBuildPath(t *testing.T) {
+func TestSelectDataPath(t *testing.T) {
 	dir, err := os.UserConfigDir()
-
 	if err != nil {
-		t.Fatalf("Something went wrong with getting os.UserConfigDir(): %v", err)
+		t.Fatalf("os.UserConfigDir() error = %v", err)
 	}
+
+	dataPath := filepath.Join(dir, "mindgo", "moods.json")
 
 	tests := []struct {
 		name     string
@@ -78,35 +81,33 @@ func TestBuildPath(t *testing.T) {
 		expected string
 	}{
 		{
-			name: "custom file",
+			name: "file flag",
 			flags: flags{
-				file: "config.json",
+				file: "moods.json",
 			},
-			expected: filepath.Join(dir, "mindgo", "config.json"),
+			expected: dataPath,
 		},
 		{
-			name: "custom path",
-			flags: flags{
-				path: "mypath/test.json",
-			},
+			name:     "path flag",
+			flags:    flags{path: "mypath/test.json"},
 			expected: "mypath/test.json",
 		},
 		{
 			name:     "no flags",
 			flags:    flags{},
-			expected: filepath.Join(dir, "mindgo", "moods.json"),
+			expected: "my/test/moods.json",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			path, err := BuildPath(tt.flags)
-
+			path, err := SelectDataPath(tt.flags, config.Config{DataPath: "my/test/moods.json"})
 			if err != nil {
-				t.Fatalf("Something went wrong: %v ", err)
+				t.Fatalf("SelectDataPath() error = %v", err)
 			}
 
 			if path != tt.expected {
-				t.Errorf("Something went wrong, expected: %v, got: %v", tt.expected, path)
+				t.Errorf("SelectDataPath() = %q, want %q", path, tt.expected)
 			}
 		})
 	}

@@ -55,10 +55,14 @@ func ParseFlags() (flags, error) {
 	return flags{file: *file}, nil
 }
 
-func BuildPath(parsedFlags flags) (string, error) {
+func SelectDataPath(parsedFlags flags, conf config.Config) (string, error) {
 	if parsedFlags.path != "" {
 		return parsedFlags.path, nil
 	}
 
-	return config.BuildDataPath(parsedFlags.file)
+	if parsedFlags.file != "" {
+		return config.BuildDataPath(parsedFlags.file)
+	}
+
+	return conf.DataPath, nil
 }
