@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -188,5 +189,32 @@ func TestLoadConfigFromInvalidFile(t *testing.T) {
 	_, err = LoadConfigFromFile(configPath)
 	if err == nil {
 		t.Fatalf("expected error for invalid json")
+	}
+}
+
+func TestSaveConfigToFile(t *testing.T) {
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "config.json")
+
+	content := Config{DataPath: "moods.json"}
+
+	err := SaveConfigToFile(configPath, content)
+	if err != nil {
+		t.Fatalf("failed to save config: %v", err)
+	}
+
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatalf("failed to read config from %s: %v", configPath, err)
+	}
+
+	var config Config
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		t.Errorf("failed to unmarshal config from %s: %v", configPath, err)
+	}
+
+	if config != content {
+		t.Errorf("got %v, expected %v", config, content)
 	}
 }
