@@ -58,6 +58,22 @@ func LoadConfigFromFile(configPath string) (Config, error) {
 	return config, nil
 }
 
+func SaveConfigToFile(configPath string, config Config) error {
+	// data, err := json.Marshal() would write everything in one line
+	// while technically correct, it's unreadable
+	data, err := json.MarshalIndent(config, "", "  ") // writes data readable to humans
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
+	}
+
+	err = os.WriteFile(configPath, data, 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write file %s: %w", configPath, err)
+	}
+
+	return nil
+}
+
 func buildPath(file, defaultFileName string) (string, error) {
 	configDir, err := os.UserConfigDir()
 	if err != nil {

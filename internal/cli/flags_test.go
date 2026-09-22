@@ -95,15 +95,13 @@ func TestSelectDataPath(t *testing.T) {
 		{
 			name:     "no flags",
 			flags:    flags{},
-			expected: dataPath,
+			expected: "my/test/moods.json",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			path, err := SelectDataPath(tt.flags, config.Config{
-				DataPath: dataPath,
-			})
+			path, err := SelectDataPath(tt.flags, config.Config{DataPath: "my/test/moods.json"})
 			if err != nil {
 				t.Fatalf("SelectDataPath() error = %v", err)
 			}
