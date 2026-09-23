@@ -242,7 +242,7 @@ func TestRemoveEntryByIndex(t *testing.T) {
 		},
 		{
 			name:            "valid index, multiple entries",
-			index:           0,
+			index:           1,
 			initialEntries:  []domain.MoodEntry{{Mood: 1, Note: "Test"}, {Mood: 2, Note: "Test"}, {Mood: 3, Note: "Test"}},
 			expectedEntries: []domain.MoodEntry{{Mood: 1, Note: "Test"}, {Mood: 3, Note: "Test"}},
 			expectedError:   false,
