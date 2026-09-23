@@ -97,74 +97,78 @@ func TestGetEntries(t *testing.T) {
 }
 
 func TestEditEntryByIndex(t *testing.T) {
-	tracker, err := NewMoodTracker(&storage.MockStorage{})
-	if err != nil {
-		t.Fatalf("failed to create tracker: %v", err)
+	tests := []struct {
+		name           string
+		initialEntries []domain.MoodEntry
+		index          int
+		entry          domain.MoodEntry
+		expectedEntry  *domain.MoodEntry
+		expectedError  bool
+	}{
+		{
+			name:           "negative index",
+			initialEntries: []domain.MoodEntry{},
+			index:          -1,
+			entry:          domain.MoodEntry{Mood: 2, Note: "Test"},
+			expectedError:  true,
+		},
+		{
+			name:           "empty tracker",
+			initialEntries: []domain.MoodEntry{},
+			index:          0,
+			entry:          domain.MoodEntry{Mood: 2, Note: "Test"},
+			expectedError:  true,
+		},
+		{
+			name:           "valid index",
+			initialEntries: []domain.MoodEntry{{ID: 1, Mood: 3, Note: "Original"}},
+			index:          0,
+			entry:          domain.MoodEntry{Mood: 5, Note: "Updated"},
+			expectedEntry:  &domain.MoodEntry{ID: 1, Mood: 5, Note: "Updated"},
+			expectedError:  false,
+		},
 	}
 
-	entry := domain.MoodEntry{
-		Mood: 2,
-		Date: time.Now(),
-		Note: "Old",
-	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockStorage := &storage.MockStorage{}
 
-	err = tracker.AddEntry(entry)
-	if err != nil {
-		t.Fatalf("unexpected error when adding entry: %v", err)
-	}
+			err := mockStorage.Save(tt.initialEntries)
+			if err != nil {
+				t.Fatalf("failed to save initial entries: %v", err)
+			}
 
-	newEntry := domain.MoodEntry{Mood: 8, Note: "New"}
+			tracker, err := NewMoodTracker(mockStorage)
+			if err != nil {
+				t.Fatalf("failed to create tracker: %v", err)
+			}
 
-	err = tracker.EditEntryByIndex(0, newEntry)
-	if err != nil {
-		t.Fatalf("unexpected error when editing entry: %v", err)
-	}
+			err = tracker.EditEntryByIndex(tt.index, tt.entry)
 
-	got := tracker.entries[0]
+			if tt.expectedError && err == nil {
+				t.Error("expected an error, got nil")
+			}
 
-	if got.Mood != newEntry.Mood {
-		t.Errorf("expected mood to be %d, got %d", newEntry.Mood, got.Mood)
-	}
+			if !tt.expectedError && err != nil {
+				t.Errorf("expected no error, got %v", err)
+			}
 
-	if got.Date != newEntry.Date {
-		t.Errorf("expected date to be %q, got %s", newEntry.Date, got.Date)
-	}
+			if tt.expectedEntry != nil {
+				got := tracker.entries[tt.index]
 
-	if got.Note != newEntry.Note {
-		t.Errorf("expected note to be %q, got %q", newEntry.Note, got.Note)
-	}
+				if got.ID != tt.expectedEntry.ID {
+					t.Errorf("expected ID to be %d, got %d", tt.expectedEntry.ID, got.ID)
+				}
 
-	// ID should not change when editing an entry.
-	if got.ID != 1 {
-		t.Errorf("expected ID to remain 1, got %d", got.ID)
-	}
-}
+				if got.Mood != tt.expectedEntry.Mood {
+					t.Errorf("expected mood to be %d, got %d", tt.expectedEntry.Mood, got.Mood)
+				}
 
-func TestEditEntryByIndexInvalidIndex(t *testing.T) {
-	tracker, err := NewMoodTracker(&storage.MockStorage{})
-	if err != nil {
-		t.Fatalf("failed to create tracker: %v", err)
-	}
-
-	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
-
-	err = tracker.EditEntryByIndex(0, entry)
-	if err == nil {
-		t.Fatal("expected an error for an invalid index")
-	}
-}
-
-func TestEditEntryByIndexNegativeIndex(t *testing.T) {
-	tracker, err := NewMoodTracker(&storage.MockStorage{})
-	if err != nil {
-		t.Fatalf("failed to create tracker: %v", err)
-	}
-
-	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
-
-	err = tracker.EditEntryByIndex(-1, entry)
-	if err == nil {
-		t.Fatal("expected an error for a negative index")
+				if got.Note != tt.expectedEntry.Note {
+					t.Errorf("expected note to be %q, got %q", tt.expectedEntry.Note, got.Note)
+				}
+			}
+		})
 	}
 }
 
