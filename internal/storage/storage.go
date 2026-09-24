@@ -26,6 +26,16 @@ type FileStorage struct {
 	Filename string
 }
 
+type SaveErrorStorage struct{}
+
+func (s *SaveErrorStorage) Save([]domain.MoodEntry) error {
+	return fmt.Errorf("save error")
+}
+
+func (s *SaveErrorStorage) Load() ([]domain.MoodEntry, error) {
+	return []domain.MoodEntry{}, nil
+}
+
 func (e *ErrorStorage) Save([]domain.MoodEntry) error {
 	return fmt.Errorf("save error")
 }
