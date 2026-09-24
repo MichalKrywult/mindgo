@@ -88,3 +88,28 @@ func TestFileStorage_LoadEmptyFile(t *testing.T) {
 	}
 
 }
+
+func TestMockStorage_SaveCopiesEntries(t *testing.T) {
+	storage := &MockStorage{}
+	entries := []domain.MoodEntry{{Mood: 5, Note: "Old"}}
+
+	err := storage.Save(entries)
+	if err != nil {
+		t.Fatalf("unexpected save error: %v", err)
+	}
+
+	entries[0].Note = "New"
+
+	loaded, err := storage.Load()
+	if err != nil {
+		t.Fatalf("unexpected load error: %v", err)
+	}
+
+	if loaded[0].Mood != 5 {
+		t.Errorf("storage was modified through original slice")
+	}
+
+	if loaded[0].Note != "Original" {
+		t.Errorf("storage was modified through original slice")
+	}
+}
