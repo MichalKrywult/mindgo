@@ -109,7 +109,37 @@ func TestMockStorage_SaveCopiesEntries(t *testing.T) {
 		t.Errorf("storage was modified through original slice")
 	}
 
-	if loaded[0].Note != "Original" {
+	if loaded[0].Note != "Old" {
 		t.Errorf("storage was modified through original slice")
+	}
+}
+func TestMockStorage_LoadCopiesEntries(t *testing.T) {
+	storage := &MockStorage{}
+	entries := []domain.MoodEntry{{Mood: 5, Note: "Old"}}
+
+	err := storage.Save(entries)
+	if err != nil {
+		t.Fatalf("unexpected save error: %v", err)
+	}
+
+	loaded, err := storage.Load()
+	if err != nil {
+		t.Fatalf("unexpected load error: %v", err)
+	}
+
+	loaded[0].Mood = 4
+	loaded[0].Note = "New"
+
+	loadedAgain, err := storage.Load()
+	if err != nil {
+		t.Fatalf("unexpected load error: %v", err)
+	}
+
+	if loadedAgain[0].Mood != 5 {
+		t.Errorf("expected mood: %v, got %d", entries[0].Mood, loadedAgain[0].Mood)
+	}
+
+	if loadedAgain[0].Note != "Old" {
+		t.Errorf("expected note %q, got %q", entries[0].Note, loadedAgain[0].Note)
 	}
 }
