@@ -105,12 +105,28 @@ func TestCLI(t *testing.T) {
 			expectedNote:  "",
 		},
 		{
-			name:          "test removing with invalid input",
-			initialEntry:  nil, // return the pointer
-			input:         "abc\nabc\n0\n",
+			name:          "test removing ALL entries success",
+			initialEntry:  &domain.MoodEntry{Mood: 2, Note: "Bad day"},
+			input:         "7\nyes\n0\n",
 			expectedCount: 0,
 			expectedMood:  0,
 			expectedNote:  "",
+		},
+		{
+			name:          "test removing ALL entries rejection",
+			initialEntry:  &domain.MoodEntry{Mood: 2, Note: "Bad day"},
+			input:         "7\nno\n0\n",
+			expectedCount: 1,
+			expectedMood:  2,
+			expectedNote:  "Bad day",
+		},
+		{
+			name:          "test removing ALL entries invalid confirmation",
+			initialEntry:  &domain.MoodEntry{Mood: 2, Note: "Bad day"},
+			input:         "7\nabc\n0\n",
+			expectedCount: 1,
+			expectedMood:  2,
+			expectedNote:  "Bad day",
 		},
 	}
 
