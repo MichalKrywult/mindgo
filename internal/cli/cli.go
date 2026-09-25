@@ -47,6 +47,21 @@ func (cli *CLI) readInt() (int, error) {
 	return strconv.Atoi(text)
 }
 
+func (cli *CLI) confirmAction(prompt string) (bool, error) {
+	fmt.Println(prompt)
+	fmt.Print("yes/no: ")
+
+	input, err := cli.readLine()
+	if err != nil {
+		return false, err
+	}
+	if strings.EqualFold(input, "yes") || strings.EqualFold(input, "y") {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func (cli *CLI) displayMenuAndReadChoice() (int, error) {
 	fmt.Println("=====MENU=====")
 	fmt.Println("1. New entry")
@@ -193,21 +208,25 @@ func (cli *CLI) handleRemoveAllEntries() error {
 		return errors.New("you don't have any entries")
 	}
 
-	fmt.Println(`Are you sure that you want to remove all entries?
-This action cannot be undone and your entries will be lost forever.
-yes (remove entries) OR no (keep entries)`)
+	prompt := `Are you sure that you want to remove all entries?
+This action cannot be undone and your entries will be lost forever.`
 
-	input, err := cli.readLine()
+	confirmed, err := cli.confirmAction(prompt)
 	if err != nil {
 		return err
 	}
 
-	if strings.EqualFold(input, "yes") || strings.EqualFold(input, "y") { // iGnOres sIzE oF leTTerS
-		cli.tracker.RemoveAllEntries()
-	} else {
-		fmt.Println("Operation rejected, entries are safe")
+	if !confirmed {
+		fmt.Println("Operation rejected, entries are safe!")
+		return nil
 	}
 
+	err = cli.tracker.RemoveAllEntries()
+	if err != nil {
+		return fmt.Errorf("failed to remove all entries: %w", err)
+	}
+
+	fmt.Println("Entries removed!")
 	return nil
 }
 
@@ -345,8 +364,6 @@ func (cli *CLI) Show() {
 				fmt.Println(err)
 				continue
 			}
-
-			fmt.Println("Entries removed!")
 
 		case 0:
 			fmt.Println("Exit")
