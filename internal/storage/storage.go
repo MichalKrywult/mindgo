@@ -13,9 +13,6 @@ type Storage interface {
 	Load() ([]domain.MoodEntry, error)
 }
 
-// always returns an error
-type ErrorStorage struct{}
-
 // MockStorage pretends to be real storage for tests
 // it remembers last state of storage
 type MockStorage struct {
@@ -26,16 +23,20 @@ type FileStorage struct {
 	Filename string
 }
 
-func (e *ErrorStorage) Save([]domain.MoodEntry) error {
+type SaveErrorStorage struct{}
+
+func (s *SaveErrorStorage) Save([]domain.MoodEntry) error {
 	return fmt.Errorf("save error")
 }
 
-func (e *ErrorStorage) Load() ([]domain.MoodEntry, error) {
-	return nil, nil
+func (s *SaveErrorStorage) Load() ([]domain.MoodEntry, error) {
+	return []domain.MoodEntry{}, nil
 }
 
 func (m *MockStorage) Save(entries []domain.MoodEntry) error {
-	m.entries = entries
+	m.entries = make([]domain.MoodEntry, len(entries))
+	copy(m.entries, entries)
+
 	return nil
 }
 

@@ -40,7 +40,7 @@ func TestAddEntry(t *testing.T) {
 }
 
 func TestAddEntryStorageError(t *testing.T) {
-	tracker, err := NewMoodTracker(&storage.ErrorStorage{})
+	tracker, err := NewMoodTracker(&storage.SaveErrorStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -173,7 +173,7 @@ func TestEditEntryByIndex(t *testing.T) {
 }
 
 func TestEditEntryByIndexStorageError(t *testing.T) {
-	tracker, err := NewMoodTracker(&storage.ErrorStorage{})
+	tracker, err := NewMoodTracker(&storage.SaveErrorStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
@@ -376,7 +376,7 @@ func TestRestoringTrackerBackup(t *testing.T) {
 }
 
 func TestRemoveEntryByIndexStorageError(t *testing.T) {
-	tracker, err := NewMoodTracker(&storage.ErrorStorage{})
+	tracker, err := NewMoodTracker(&storage.SaveErrorStorage{})
 	if err != nil {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
