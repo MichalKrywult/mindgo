@@ -41,92 +41,98 @@ func TestIsIndexValid(t *testing.T) {
 
 func TestCLI(t *testing.T) {
 	tests := []struct {
-		name          string
-		initialEntry  *domain.MoodEntry //pointers can be nil, values cannot
-		input         string
-		expectedCount int
-		expectedMood  int
-		expectedNote  string
+		name            string
+		initialEntries  []domain.MoodEntry
+		input           string
+		expectedEntries []domain.MoodEntry
 	}{
 		{
-			name:          "test invalid input",
-			initialEntry:  nil, // return the pointer
-			input:         "abc\nabc\n",
-			expectedCount: 0,
-			expectedMood:  0,
-			expectedNote:  "",
+			name:            "test invalid input",
+			initialEntries:  nil,
+			input:           "abc\nabc\n",
+			expectedEntries: []domain.MoodEntry{},
 		},
 		{
-			name:          "test add entry",
-			initialEntry:  nil,
-			input:         "1\n8\nGreat day\n0\n",
-			expectedCount: 1,
-			expectedMood:  8,
-			expectedNote:  "Great day",
+			name:           "test add entry",
+			initialEntries: nil,
+			input:          "1\n8\nGreat day\n0\n",
+			expectedEntries: []domain.MoodEntry{
+				{Mood: 8, Note: "Great day"},
+			},
 		},
 		{
-			name:          "test edit entry",
-			initialEntry:  &domain.MoodEntry{Mood: 2, Note: "Bad day"}, // return the pointer
-			input:         "2\n1\n8\nGreat day\n0\n",
-			expectedCount: 1,
-			expectedMood:  8,
-			expectedNote:  "Great day",
+			name: "test edit entry",
+			initialEntries: []domain.MoodEntry{
+				{Mood: 2, Note: "Bad day"},
+			},
+			input: "2\n1\n8\nGreat day\n0\n",
+			expectedEntries: []domain.MoodEntry{
+				{Mood: 8, Note: "Great day"},
+			},
 		},
 		{
-			name:          "test editing empty tracker",
-			initialEntry:  nil, // return the pointer
-			input:         "3\n0\n",
-			expectedCount: 0,
-			expectedMood:  0,
-			expectedNote:  "",
+			name:            "test editing empty tracker",
+			initialEntries:  nil,
+			input:           "3\n0\n",
+			expectedEntries: []domain.MoodEntry{},
 		},
 		{
-			name:          "test removing entry",
-			initialEntry:  &domain.MoodEntry{Mood: 2, Note: "Bad day"}, // return the pointer
-			input:         "3\n1\n0\n",
-			expectedCount: 0,
-			expectedMood:  0,
-			expectedNote:  "",
+			name: "test removing entry",
+			initialEntries: []domain.MoodEntry{
+				{Mood: 2, Note: "Bad day"},
+			},
+			input:           "3\n1\n0\n",
+			expectedEntries: []domain.MoodEntry{},
 		},
 		{
-			name:          "test removing with invalid index",
-			initialEntry:  nil, // return the pointer
-			input:         "3\n0\n",
-			expectedCount: 0,
-			expectedMood:  0,
-			expectedNote:  "",
+			name:            "test removing with invalid index",
+			initialEntries:  nil,
+			input:           "3\n0\n",
+			expectedEntries: []domain.MoodEntry{},
 		},
 		{
-			name:          "test removing with invalid input",
-			initialEntry:  nil, // return the pointer
-			input:         "3\nabc\n0\n",
-			expectedCount: 0,
-			expectedMood:  0,
-			expectedNote:  "",
+			name:            "test removing with invalid input",
+			initialEntries:  nil,
+			input:           "3\nabc\n0\n",
+			expectedEntries: []domain.MoodEntry{},
 		},
 		{
-			name:          "test removing ALL entries success",
-			initialEntry:  &domain.MoodEntry{Mood: 2, Note: "Bad day"},
-			input:         "7\nyes\n0\n",
-			expectedCount: 0,
-			expectedMood:  0,
-			expectedNote:  "",
+			name: "test removing ALL entries success",
+			initialEntries: []domain.MoodEntry{
+				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day"},
+			},
+			input:           "7\nyes\n0\n",
+			expectedEntries: []domain.MoodEntry{},
 		},
 		{
-			name:          "test removing ALL entries rejection",
-			initialEntry:  &domain.MoodEntry{Mood: 2, Note: "Bad day"},
-			input:         "7\nno\n0\n",
-			expectedCount: 1,
-			expectedMood:  2,
-			expectedNote:  "Bad day",
+			name: "test removing ALL entries rejection",
+			initialEntries: []domain.MoodEntry{
+				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day"},
+			},
+			input: "7\nno\n0\n",
+			expectedEntries: []domain.MoodEntry{
+				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day"},
+			},
 		},
 		{
-			name:          "test removing ALL entries invalid confirmation",
-			initialEntry:  &domain.MoodEntry{Mood: 2, Note: "Bad day"},
-			input:         "7\nabc\n0\n",
-			expectedCount: 1,
-			expectedMood:  2,
-			expectedNote:  "Bad day",
+			name: "test removing ALL entries invalid confirmation",
+			initialEntries: []domain.MoodEntry{
+				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day"},
+			},
+			input: "7\nabc\n0\n",
+			expectedEntries: []domain.MoodEntry{
+				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day"},
+			},
 		},
 	}
 
@@ -137,10 +143,10 @@ func TestCLI(t *testing.T) {
 				t.Fatalf("failed to create tracker: %v", err)
 			}
 
-			if tt.initialEntry != nil {
-				err := tracker.AddEntry(*tt.initialEntry)
+			for _, entry := range tt.initialEntries {
+				err := tracker.AddEntry(entry)
 				if err != nil {
-					t.Fatalf("failed to add inital entry %v", err)
+					t.Fatalf("failed to add initial entry: %v", err)
 				}
 			}
 
@@ -149,20 +155,28 @@ func TestCLI(t *testing.T) {
 
 			entries := tracker.GetEntries()
 
-			if len(entries) != tt.expectedCount {
-				t.Fatalf("expected %d, got %d", tt.expectedCount, len(entries))
+			if len(entries) != len(tt.expectedEntries) {
+				t.Fatalf("expected %d entries, got %d",
+					len(tt.expectedEntries),
+					len(entries))
 			}
 
-			if len(entries) == 0 {
-				return
-			}
+			for i, expected := range tt.expectedEntries {
+				actual := entries[i]
 
-			if entries[0].Mood != tt.expectedMood {
-				t.Errorf("expected mood %d, got %d", tt.expectedMood, entries[0].Mood)
-			}
+				if actual.Mood != expected.Mood {
+					t.Errorf("entry %d: expected mood %d, got %d",
+						i,
+						expected.Mood,
+						actual.Mood)
+				}
 
-			if entries[0].Note != tt.expectedNote {
-				t.Errorf("expected note %q, got %q", tt.expectedNote, entries[0].Note)
+				if actual.Note != expected.Note {
+					t.Errorf("entry %d: expected note %q, got %q",
+						i,
+						expected.Note,
+						actual.Note)
+				}
 			}
 		})
 	}
