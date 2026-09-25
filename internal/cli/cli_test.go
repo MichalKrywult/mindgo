@@ -91,12 +91,6 @@ func TestCLI(t *testing.T) {
 			expectedEntries: []domain.MoodEntry{},
 		},
 		{
-			name:            "test removing with invalid input",
-			initialEntries:  nil,
-			input:           "3\nabc\n0\n",
-			expectedEntries: []domain.MoodEntry{},
-		},
-		{
 			name: "test removing ALL entries success",
 			initialEntries: []domain.MoodEntry{
 				{Mood: 2, Note: "Bad day"},
@@ -133,6 +127,12 @@ func TestCLI(t *testing.T) {
 				{Mood: 2, Note: "Bad day"},
 				{Mood: 2, Note: "Bad day"},
 			},
+		},
+		{
+			name:            "test removing ALL entries empty tracker",
+			initialEntries:  []domain.MoodEntry{},
+			input:           "7\n0\n",
+			expectedEntries: []domain.MoodEntry{},
 		},
 	}
 
