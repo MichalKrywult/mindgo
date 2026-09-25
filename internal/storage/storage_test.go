@@ -98,6 +98,7 @@ func TestMockStorage_SaveCopiesEntries(t *testing.T) {
 		t.Fatalf("unexpected save error: %v", err)
 	}
 
+	entries[0].Mood = 4
 	entries[0].Note = "New"
 
 	loaded, err := storage.Load()

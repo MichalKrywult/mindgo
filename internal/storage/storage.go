@@ -34,7 +34,9 @@ func (s *SaveErrorStorage) Load() ([]domain.MoodEntry, error) {
 }
 
 func (m *MockStorage) Save(entries []domain.MoodEntry) error {
-	m.entries = entries
+	m.entries = make([]domain.MoodEntry, len(entries))
+	copy(m.entries, entries)
+
 	return nil
 }
 
