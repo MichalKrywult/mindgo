@@ -55,6 +55,7 @@ func (cli *CLI) displayMenuAndReadChoice() (int, error) {
 	fmt.Println("4. Show history")
 	fmt.Println("5. Show statistics")
 	fmt.Println("6. Export to csv")
+	fmt.Println("7. REMOVE ALL ENTRIES")
 	fmt.Println("0. Exit")
 
 	fmt.Print("Your choice: ")
@@ -187,6 +188,29 @@ func (cli *CLI) handleRemoveEntry() error {
 	return nil
 }
 
+func (cli *CLI) handleRemoveAllEntries() error {
+	if !cli.hasEntries() {
+		return errors.New("you don't have any entries")
+	}
+
+	fmt.Println(`Are you sure that you want to remove all entries?
+This action cannot be undone and your entries will be lost forever.
+yes (remove entries) OR no (keep entries)`)
+
+	input, err := cli.readLine()
+	if err != nil {
+		return err
+	}
+
+	if strings.EqualFold(input, "yes") || strings.EqualFold(input, "y") { // iGnOres sIzE oF leTTerS
+		cli.tracker.RemoveAllEntries()
+	} else {
+		fmt.Println("Operation rejected, entries are safe")
+	}
+
+	return nil
+}
+
 func (cli *CLI) handleStatistics() error {
 	entries := cli.tracker.GetEntries()
 
@@ -314,6 +338,15 @@ func (cli *CLI) Show() {
 			}
 
 			fmt.Println("Entries exported successfully")
+
+		case 7:
+			err := cli.handleRemoveAllEntries()
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+
+			fmt.Println("Entries removed!")
 
 		case 0:
 			fmt.Println("Exit")
