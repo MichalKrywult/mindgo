@@ -403,3 +403,23 @@ func TestRemoveEntryByIndexStorageError(t *testing.T) {
 		t.Errorf("expected entryID to be %d, got %d instead", entry.ID, tracker.entryID)
 	}
 }
+
+func TestRemoveAllEntries(t *testing.T) {
+	tracker, err := NewMoodTracker(&storage.MockStorage{})
+	if err != nil {
+		t.Fatalf("failed to create tracker: %v", err)
+	}
+
+	entries := []domain.MoodEntry{{Mood: 3, Note: "A"}, {Mood: 5, Note: "B"}, {Mood: 1, Note: "C"}}
+
+	tracker.entries = entries
+
+	err = tracker.RemoveAllEntries()
+	if err != nil {
+		t.Errorf("failed to remove all entries: %v", err)
+	}
+
+	if len(tracker.entries) != 0 {
+		t.Errorf("length of tracker.entries is not equal to 0")
+	}
+}
