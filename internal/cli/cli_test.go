@@ -77,6 +77,12 @@ func TestCLI(t *testing.T) {
 			expectedEntries: []domain.MoodEntry{},
 		},
 		{
+			name:            "test edit entry invalid index",
+			initialEntries:  []domain.MoodEntry{{Mood: 2, Note: "Bad day"}},
+			input:           "2\n7\n0\n",
+			expectedEntries: []domain.MoodEntry{{Mood: 2, Note: "Bad day"}},
+		},
+		{
 			name: "test removing entry",
 			initialEntries: []domain.MoodEntry{
 				{Mood: 2, Note: "Bad day"},
