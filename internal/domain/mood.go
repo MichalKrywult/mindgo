@@ -23,6 +23,9 @@ func NewMoodEntry(mood int, date time.Time, note string, tags []string) (MoodEnt
 		return MoodEntry{}, errors.New("invalid Mood range")
 	}
 
-	moodEntry := MoodEntry{Mood: mood, Date: date, Note: note, Tags: tags}
+	copyTags := make([]string, len(tags))
+	copy(copyTags, tags)
+
+	moodEntry := MoodEntry{Mood: mood, Date: date, Note: note, Tags: copyTags}
 	return moodEntry, nil
 }
