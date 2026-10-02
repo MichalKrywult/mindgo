@@ -70,10 +70,13 @@ func (tracker *MoodTracker) validateIndex(index int) error {
 
 func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {
 	entries := make([]domain.MoodEntry, len(tracker.entries))
-	//we have to create space for that copy with make()
-	// copy() doesn't make a slice bigger
 	copy(entries, tracker.entries)
-	//now we can copy tracker.entries into entries
+
+	for i := range entries {
+		entries[i].Tags = make([]string, len(tracker.entries[i].Tags))
+		copy(entries[i].Tags, tracker.entries[i].Tags)
+	}
+	// each Tag set in entry has its own make/copy 
 
 	return entries
 }
