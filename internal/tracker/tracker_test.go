@@ -68,7 +68,7 @@ func TestGetEntries(t *testing.T) {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test"}
+	entry := domain.MoodEntry{Mood: 2, Date: time.Now(), Note: "Test", Tags: []string{"test", "test2"}}
 
 	err = tracker.AddEntry(entry)
 	if err != nil {
@@ -86,13 +86,19 @@ func TestGetEntries(t *testing.T) {
 		t.Errorf("expected %d entries, got %d", len(tracker.entries), len(data))
 	}
 
-	data[0].Mood = 99
-	if tracker.entries[0].Mood == 99 {
-		t.Error("modifying returned entries changed the tracker state")
-	}
-
 	if data[0].ID != 1 || data[1].ID != 2 {
 		t.Error("entry IDs are invalid")
+	}
+
+	data[0].Mood = 99
+	data[0].Tags[0] = "test3"
+
+	if tracker.entries[0].Mood == 99 {
+		t.Error("modifying returned entries changed the tracker state (mood)")
+	}
+
+	if tracker.entries[0].Tags[0] != "test" {
+		t.Error("modifying returned entries changed the tracker state (tags)")
 	}
 }
 
