@@ -125,7 +125,7 @@ func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
 		return domain.MoodEntry{}, err
 	}
 
-	return domain.NewMoodEntry(mood, time.Now(), note)
+	return domain.NewMoodEntry(mood, time.Now(), note, []string{}) // #TODO - implement tags
 }
 
 func (cli *CLI) handleAddEntry() error {

@@ -1,6 +1,7 @@
 package tracker
 
 import (
+	"reflect"
 	"testing"
 	"time"
 
@@ -200,7 +201,7 @@ func TestEditEntryByIndexStorageError(t *testing.T) {
 		t.Errorf("expected tracker to contain 1 entry, got %d", len(tracker.entries))
 	}
 
-	if tracker.entries[0] != entry {
+	if !reflect.DeepEqual(tracker.entries[0], entry) { // allows to compare Types with []slices inside
 		t.Errorf("expected original entry to be restored, got %v instead", tracker.entries[0])
 	}
 
@@ -401,7 +402,7 @@ func TestRemoveEntryByIndexStorageError(t *testing.T) {
 		t.Errorf("expected tracker to contain 1 entry, got %d", len(tracker.entries))
 	}
 
-	if tracker.entries[0] != entry {
+	if !reflect.DeepEqual(tracker.entries[0], entry) {
 		t.Errorf("expected original entry to be restored, got %v instead", tracker.entries[0])
 	}
 
