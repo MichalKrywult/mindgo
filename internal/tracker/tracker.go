@@ -29,6 +29,11 @@ func (tracker *MoodTracker) createTrackerBackup() backupMoodTracker {
 	backupEntries := make([]domain.MoodEntry, len(tracker.entries))
 	copy(backupEntries, tracker.entries)
 
+	for i := range len(tracker.entries) {
+		backupEntries[i].Tags = make([]string, len(tracker.entries[i].Tags))
+		copy(backupEntries[i].Tags, tracker.entries[i].Tags)
+	}
+
 	backupEntryID := tracker.entryID
 	return backupMoodTracker{entries: backupEntries, entryID: backupEntryID}
 }
@@ -76,7 +81,7 @@ func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {
 		entries[i].Tags = make([]string, len(tracker.entries[i].Tags))
 		copy(entries[i].Tags, tracker.entries[i].Tags)
 	}
-	// each Tag set in entry has its own make/copy 
+	// each Tag set in entry has its own make/copy
 
 	return entries
 }
