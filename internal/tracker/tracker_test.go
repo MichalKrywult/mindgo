@@ -16,7 +16,7 @@ func TestAddEntry(t *testing.T) {
 	}
 
 	now := time.Now()
-	entry := domain.MoodEntry{Mood: 2, Date: now, Note: "Test"}
+	entry := domain.MoodEntry{Mood: 2, Date: now, Note: "Test", Tags: []string{"test1", "test2"}}
 
 	err = tracker.AddEntry(entry)
 	if err != nil {
@@ -38,6 +38,10 @@ func TestAddEntry(t *testing.T) {
 	if tracker.entries[0].Note != "Test" {
 		t.Errorf("expected note to be %q, got %s", "Test", tracker.entries[0].Note)
 	}
+
+	if !reflect.DeepEqual(tracker.entries[0].Tags, entry.Tags) {
+		t.Errorf("expected tags to be %v, got %v", entry.Tags, tracker.entries[0].Tags)
+	}
 }
 
 func TestAddEntryStorageError(t *testing.T) {
@@ -47,7 +51,7 @@ func TestAddEntryStorageError(t *testing.T) {
 	}
 
 	now := time.Now()
-	entry := domain.MoodEntry{Mood: 2, Date: now, Note: "Test"}
+	entry := domain.MoodEntry{Mood: 2, Date: now, Note: "Test", Tags: []string{"test1", "test2"}}
 
 	err = tracker.AddEntry(entry)
 	if err == nil {
@@ -116,22 +120,22 @@ func TestEditEntryByIndex(t *testing.T) {
 			name:           "negative index",
 			initialEntries: []domain.MoodEntry{},
 			index:          -1,
-			entry:          domain.MoodEntry{Mood: 2, Note: "Test"},
+			entry:          domain.MoodEntry{Mood: 2, Note: "Test", Tags: []string{"test1", "test2"}},
 			expectedError:  true,
 		},
 		{
 			name:           "empty tracker",
 			initialEntries: []domain.MoodEntry{},
 			index:          0,
-			entry:          domain.MoodEntry{Mood: 2, Note: "Test"},
+			entry:          domain.MoodEntry{Mood: 2, Note: "Test", Tags: []string{"test1", "test2"}},
 			expectedError:  true,
 		},
 		{
 			name:           "valid index",
-			initialEntries: []domain.MoodEntry{{ID: 1, Mood: 3, Note: "Original"}},
+			initialEntries: []domain.MoodEntry{{ID: 1, Mood: 3, Note: "Original", Tags: []string{"test3", "test4"}}},
 			index:          0,
-			entry:          domain.MoodEntry{Mood: 5, Note: "Updated"},
-			expectedEntry:  &domain.MoodEntry{ID: 1, Mood: 5, Note: "Updated"},
+			entry:          domain.MoodEntry{Mood: 5, Note: "Updated", Tags: []string{"test1", "test2"}},
+			expectedEntry:  &domain.MoodEntry{ID: 1, Mood: 5, Note: "Updated", Tags: []string{"test1", "test2"}},
 			expectedError:  false,
 		},
 	}
@@ -174,6 +178,10 @@ func TestEditEntryByIndex(t *testing.T) {
 				if got.Note != tt.expectedEntry.Note {
 					t.Errorf("expected note to be %q, got %q", tt.expectedEntry.Note, got.Note)
 				}
+
+				if !reflect.DeepEqual(got.Tags, tt.expectedEntry.Tags) {
+					t.Errorf("expected tags to be %v, got %v", tt.expectedEntry.Tags, got.Tags)
+				}
 			}
 		})
 	}
@@ -185,7 +193,7 @@ func TestEditEntryByIndexStorageError(t *testing.T) {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := domain.MoodEntry{Mood: 2, Note: "Original"}
+	entry := domain.MoodEntry{Mood: 8, Note: "Original", Tags: []string{"test1", "test2"}}
 
 	tracker.entries = []domain.MoodEntry{entry}
 	tracker.entryID = 0
@@ -293,6 +301,10 @@ func TestRemoveEntryByIndex(t *testing.T) {
 				if expectedEntry.Note != got.Note {
 					t.Errorf("expected note: %v, got: %v instead", expectedEntry.Note, got.Note)
 				}
+
+				if !reflect.DeepEqual(expectedEntry.Tags, got.Tags) {
+					t.Errorf("expected tags: %v, got: %v instead", expectedEntry.Tags, got.Tags)
+				}
 			}
 		})
 	}
@@ -304,8 +316,8 @@ func TestCreatingTrackerBackup(t *testing.T) {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := domain.MoodEntry{Mood: 8, Note: "Test"}
-	entry2 := domain.MoodEntry{Mood: 2, Note: "Test2"}
+	entry := domain.MoodEntry{Mood: 8, Note: "Test", Tags: []string{"test1", "test2"}}
+	entry2 := domain.MoodEntry{Mood: 2, Note: "Test2", Tags: []string{"test3", "test4"}}
 
 	err = tracker.AddEntry(entry)
 	if err != nil {
@@ -335,6 +347,11 @@ func TestCreatingTrackerBackup(t *testing.T) {
 	if backup.entryID != 1 {
 		t.Errorf("expected entryID %d, got %d", 1, backup.entryID)
 	}
+
+	entry.Tags[0] = "new"
+	if backup.entries[0].Tags[0] != "test1" {
+		t.Errorf("modifying original changed backup, expected Tag %s, got %s", "test1", backup.entries[0].Tags[0])
+	}
 }
 
 func TestRestoringTrackerBackup(t *testing.T) {
@@ -343,8 +360,8 @@ func TestRestoringTrackerBackup(t *testing.T) {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := domain.MoodEntry{Mood: 8, Note: "Test"}
-	entry2 := domain.MoodEntry{Mood: 2, Note: "Test2"}
+	entry := domain.MoodEntry{Mood: 8, Note: "Test", Tags: []string{"test1", "test2"}}
+	entry2 := domain.MoodEntry{Mood: 2, Note: "Test2", Tags: []string{"test3, test4"}}
 
 	err = tracker.AddEntry(entry)
 	if err != nil {
@@ -380,6 +397,10 @@ func TestRestoringTrackerBackup(t *testing.T) {
 	if tracker.entryID != 1 {
 		t.Errorf("expected entryID %d, got %d", 1, tracker.entryID)
 	}
+
+	if !reflect.DeepEqual(tracker.entries[0].Tags, entry.Tags) {
+		t.Errorf("expected tags %v, got %v", entry.Tags, tracker.entries[0].Tags)
+	}
 }
 
 func TestRemoveEntryByIndexStorageError(t *testing.T) {
@@ -388,7 +409,7 @@ func TestRemoveEntryByIndexStorageError(t *testing.T) {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entry := domain.MoodEntry{Mood: 2, Note: "Test"}
+	entry := domain.MoodEntry{Mood: 8, Note: "Test", Tags: []string{"test1", "test2"}}
 
 	tracker.entries = []domain.MoodEntry{entry}
 	tracker.entryID = 0
@@ -417,7 +438,10 @@ func TestRemoveAllEntries(t *testing.T) {
 		t.Fatalf("failed to create tracker: %v", err)
 	}
 
-	entries := []domain.MoodEntry{{Mood: 3, Note: "A"}, {Mood: 5, Note: "B"}, {Mood: 1, Note: "C"}}
+	entries := []domain.MoodEntry{
+		{Mood: 8, Note: "A", Tags: []string{"test1", "test2"}},
+		{Mood: 5, Note: "B", Tags: []string{"test1", "test2"}},
+		{Mood: 1, Note: "C", Tags: []string{"test1", "test2"}}}
 
 	tracker.entries = entries
 
