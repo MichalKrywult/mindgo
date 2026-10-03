@@ -39,7 +39,15 @@ func (tracker *MoodTracker) createTrackerBackup() backupMoodTracker {
 }
 
 func (tracker *MoodTracker) restoreTrackerFromBackup(backup backupMoodTracker) {
-	tracker.entries = backup.entries
+	tracker.entries = make([]domain.MoodEntry, len(backup.entries))
+
+	for i, entry := range backup.entries {
+		tracker.entries[i] = entry
+
+		tracker.entries[i].Tags = make([]string, len(entry.Tags))
+		copy(tracker.entries[i].Tags, entry.Tags)
+	}
+
 	tracker.entryID = backup.entryID
 }
 
