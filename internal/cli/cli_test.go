@@ -2,6 +2,7 @@ package cli
 
 import (
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -55,9 +56,25 @@ func TestCLI(t *testing.T) {
 		{
 			name:           "test add entry",
 			initialEntries: nil,
-			input:          "1\n8\nGreat day\n0\n",
+			input:          "1\n8\nGreat day\nwork, exercise, family\n0\n",
 			expectedEntries: []domain.MoodEntry{
-				{Mood: 8, Note: "Great day"},
+				{
+					Mood: 8,
+					Note: "Great day",
+					Tags: []string{"work", "exercise", "family"},
+				},
+			},
+		},
+		{
+			name:           "test add entry with tags containing spaces/empty values",
+			initialEntries: nil,
+			input:          "1\n8\nGreat day\nwork, exercise, , family,\n0\n",
+			expectedEntries: []domain.MoodEntry{
+				{
+					Mood: 8,
+					Note: "Great day",
+					Tags: []string{"work", "exercise", "family"},
+				},
 			},
 		},
 		{
@@ -182,6 +199,13 @@ func TestCLI(t *testing.T) {
 						i,
 						expected.Note,
 						actual.Note)
+				}
+
+				if !reflect.DeepEqual(actual.Tags, expected.Tags) {
+					t.Errorf("entry %d: expected tags %#v, got %#v",
+						i,
+						expected.Tags,
+						actual.Tags)
 				}
 			}
 		})
