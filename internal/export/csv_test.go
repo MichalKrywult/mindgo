@@ -26,20 +26,23 @@ func TestExportCSV(t *testing.T) {
 		{
 			name: "correct line (single line)",
 			entries: []domain.MoodEntry{
-				{Date: time.Date(2026, 9, 7, 0, 0, 0, 0, time.UTC), Mood: 4, Note: "Test", ID: 1},
+				{Date: time.Date(2026, 9, 7, 0, 0, 0, 0, time.UTC),
+					Mood: 4, Note: "Test",
+					ID:   1,
+					Tags: []string{"test1", "test2"}},
 			},
-			expected: "1,4,2026-09-07T00:00Z,Test\n",
+			expected: "1,4,2026-09-07T00:00Z,Test,\"test1,test2\"\n",
 		},
 		{
 			name: "correct input (multiple lines)",
 			entries: []domain.MoodEntry{
-				{Date: time.Date(2026, 9, 7, 0, 0, 0, 0, time.UTC), Mood: 4, Note: "Test", ID: 1},
-				{Date: time.Date(2025, 1, 7, 0, 0, 0, 0, time.UTC), Mood: 8, Note: "Test2 ,", ID: 2},
-				{Date: time.Date(124, 1, 7, 0, 0, 0, 0, time.UTC), Mood: 2, Note: "Test3 space", ID: 3},
+				{Date: time.Date(2026, 9, 7, 0, 0, 0, 0, time.UTC), Mood: 4, Note: "Test", ID: 1, Tags: []string{"test1", "test2"}},
+				{Date: time.Date(2025, 1, 7, 0, 0, 0, 0, time.UTC), Mood: 8, Note: "Test2 ,", ID: 2, Tags: []string{"test1", "test2"}},
+				{Date: time.Date(124, 1, 7, 0, 0, 0, 0, time.UTC), Mood: 2, Note: "Test3 space", ID: 3, Tags: []string{"test1", "test2"}},
 			},
-			expected: "1,4,2026-09-07T00:00Z,Test\n" +
-				"2,8,2025-01-07T00:00Z,\"Test2 ,\"\n" +
-				"3,2,0124-01-07T00:00Z,Test3 space\n",
+			expected: "1,4,2026-09-07T00:00Z,Test,\"test1,test2\"\n" +
+				"2,8,2025-01-07T00:00Z,\"Test2 ,\",\"test1,test2\"\n" +
+				"3,2,0124-01-07T00:00Z,Test3 space,\"test1,test2\"\n",
 		},
 	}
 

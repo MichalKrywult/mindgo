@@ -3,21 +3,28 @@ package storage
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
 )
 
 func TestFileStorage_SaveAndLoad(t *testing.T) {
-	// os.MkdirTemp creates temporary dictionary
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "test_moods.json")
 
 	storage := &FileStorage{Filename: filePath}
 
-	entries := []domain.MoodEntry{{Mood: 5, Note: "Test"}}
-	err := storage.Save(entries)
-	if err != nil {
+	entries := []domain.MoodEntry{
+		{
+			ID:   1,
+			Mood: 5,
+			Note: "Test",
+			Tags: []string{"work", "important", "go"},
+		},
+	}
+
+	if err := storage.Save(entries); err != nil {
 		t.Fatalf("unexpected save error: %v", err)
 	}
 
@@ -26,8 +33,8 @@ func TestFileStorage_SaveAndLoad(t *testing.T) {
 		t.Fatalf("unexpected load error: %v", err)
 	}
 
-	if len(loaded) != 1 || loaded[0].Mood != 5 {
-		t.Errorf("loaded data mismatch")
+	if !reflect.DeepEqual(entries, loaded) {
+		t.Errorf("loaded data mismatch:\nwant: %+v\ngot:  %+v", entries, loaded)
 	}
 }
 
