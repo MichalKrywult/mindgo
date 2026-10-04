@@ -125,7 +125,23 @@ func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
 		return domain.MoodEntry{}, err
 	}
 
-	return domain.NewMoodEntry(mood, time.Now(), note, []string{}) // #TODO - implement tags
+	fmt.Print("Tags (comma-separated): ")
+	
+	tagsInput, err := cli.readLine()
+	if err != nil {
+		return domain.MoodEntry{}, err
+	}
+
+	var tags []string
+	for _, tag := range strings.Split(tagsInput, ",") {
+		tag = strings.TrimSpace(tag)
+
+		if tag != "" {
+			tags = append(tags, tag)
+		}
+	}
+
+	return domain.NewMoodEntry(mood, time.Now(), note, tags)
 }
 
 func (cli *CLI) handleAddEntry() error {
