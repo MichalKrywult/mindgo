@@ -22,6 +22,12 @@ func TestFileStorage_SaveAndLoad(t *testing.T) {
 			Note: "Test",
 			Tags: []string{"work", "important", "go"},
 		},
+		{
+			ID:   2,
+			Mood: 3,
+			Note: "Sport",
+			Tags: []string{"gym", "cycling"},
+		},
 	}
 
 	if err := storage.Save(entries); err != nil {
@@ -98,7 +104,13 @@ func TestFileStorage_LoadEmptyFile(t *testing.T) {
 
 func TestMockStorage_SaveCopiesEntries(t *testing.T) {
 	storage := &MockStorage{}
-	entries := []domain.MoodEntry{{Mood: 5, Note: "Old"}}
+	entries := []domain.MoodEntry{
+		{
+			Mood: 5,
+			Note: "Old",
+			Tags: []string{"test1", "test2"},
+		},
+	}
 
 	err := storage.Save(entries)
 	if err != nil {
@@ -107,6 +119,7 @@ func TestMockStorage_SaveCopiesEntries(t *testing.T) {
 
 	entries[0].Mood = 4
 	entries[0].Note = "New"
+	entries[0].Tags[0] = "changed"
 
 	loaded, err := storage.Load()
 	if err != nil {
@@ -114,11 +127,15 @@ func TestMockStorage_SaveCopiesEntries(t *testing.T) {
 	}
 
 	if loaded[0].Mood != 5 {
-		t.Errorf("storage was modified through original slice")
+		t.Errorf("storage was modified through original slice (Mood value)")
 	}
 
 	if loaded[0].Note != "Old" {
-		t.Errorf("storage was modified through original slice")
+		t.Errorf("storage was modified through original slice (Note)")
+	}
+
+	if loaded[0].Tags[0] != "test1" {
+		t.Errorf("storage was modified through original slice (Tags)")
 	}
 }
 func TestMockStorage_LoadCopiesEntries(t *testing.T) {
