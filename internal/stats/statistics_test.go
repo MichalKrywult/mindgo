@@ -140,3 +140,52 @@ func TestCalculateStatsByWeekday(t *testing.T) {
 		})
 	}
 }
+
+func TestCalculateStatsByTag(t *testing.T) {
+	tests := []struct {
+		name     string
+		entries  []domain.MoodEntry
+		expected map[string]stats.Summary
+	}{
+		{
+			name: "multiple entries, without duplicate tags in single entry",
+			entries: []domain.MoodEntry{
+				{
+					Mood: 5,
+					Tags: []string{"work", "exercise"},
+				},
+				{
+					Mood: 3,
+					Tags: []string{"work"},
+				},
+				{
+					Mood: 4,
+					Tags: []string{"exercise"},
+				}},
+			expected: map[string]stats.Summary{
+				"work": {
+					TotalCount: 2,
+					Average:    4,
+					MinMood:    3,
+					MaxMood:    5,
+				},
+				"exercise": {
+					TotalCount: 2,
+					Average:    4.5,
+					MinMood:    4,
+					MaxMood:    5,
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := stats.CalculateStatsByTag(tt.entries)
+
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("expected %v, got %v", tt.expected, result)
+			}
+		})
+	}
+}
