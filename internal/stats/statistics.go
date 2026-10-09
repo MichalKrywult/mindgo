@@ -107,10 +107,16 @@ func CalculateStatsByTag(entries []domain.MoodEntry) map[string]Summary {
 	})
 
 	for _, entry := range entries {
+		seen := make(map[string]bool)
 
 		for _, tag := range entry.Tags {
-			stats, exists := tagStats[tag] //we can modify only 'local' copy of each tag from tagStats
+			if seen[tag] == true {
+				continue
+			}
 
+			seen[tag] = true
+
+			stats, exists := tagStats[tag]
 			mood := entry.Mood
 			stats.Sum += float64(mood)
 			stats.Count++
@@ -131,7 +137,6 @@ func CalculateStatsByTag(entries []domain.MoodEntry) map[string]Summary {
 			}
 
 			tagStats[tag] = stats
-
 		}
 	}
 
