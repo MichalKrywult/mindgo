@@ -177,6 +177,36 @@ func TestCalculateStatsByTag(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "multiple entries, with duplicate tags in single entry",
+			entries: []domain.MoodEntry{
+				{
+					Mood: 5,
+					Tags: []string{"work", "exercise", "work", "work"},
+				},
+				{
+					Mood: 3,
+					Tags: []string{"work"},
+				},
+				{
+					Mood: 4,
+					Tags: []string{"exercise"},
+				}},
+			expected: map[string]stats.Summary{
+				"work": {
+					TotalCount: 2,
+					Average:    4,
+					MinMood:    3,
+					MaxMood:    5,
+				},
+				"exercise": {
+					TotalCount: 2,
+					Average:    4.5,
+					MinMood:    4,
+					MaxMood:    5,
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
