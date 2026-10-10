@@ -207,6 +207,16 @@ func TestCalculateStatsByTag(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "no tags",
+			entries: []domain.MoodEntry{
+				{
+					Mood: 5,
+					Tags: []string{},
+				},
+			},
+			expected: map[string]stats.Summary{},
+		},
 	}
 
 	for _, tt := range tests {
