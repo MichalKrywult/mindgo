@@ -101,11 +101,12 @@ func (cli *CLI) displayAllEntries() {
 	fmt.Println("All of your entries:")
 	for i := range entries {
 		fmt.Printf(
-			"%d. %d | %s | %s\n",
+			"%d. %d | %s | %s | %s\n",
 			i+1,
 			entries[i].Mood,
 			entries[i].Date.Format("2006-01-02 15:04"),
 			entries[i].Note,
+			strings.Join(entries[i].Tags, ", "),
 		)
 	}
 }
@@ -125,7 +126,23 @@ func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
 		return domain.MoodEntry{}, err
 	}
 
-	return domain.NewMoodEntry(mood, time.Now(), note)
+	fmt.Print("Tags (comma-separated): ")
+
+	tagsInput, err := cli.readLine()
+	if err != nil {
+		return domain.MoodEntry{}, err
+	}
+
+	var tags []string
+	for _, tag := range strings.Split(tagsInput, ",") {
+		tag = strings.TrimSpace(tag)
+
+		if tag != "" {
+			tags = append(tags, tag)
+		}
+	}
+
+	return domain.NewMoodEntry(mood, time.Now(), note, tags)
 }
 
 func (cli *CLI) handleAddEntry() error {

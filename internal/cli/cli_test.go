@@ -2,6 +2,7 @@ package cli
 
 import (
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -55,19 +56,35 @@ func TestCLI(t *testing.T) {
 		{
 			name:           "test add entry",
 			initialEntries: nil,
-			input:          "1\n8\nGreat day\n0\n",
+			input:          "1\n8\nGreat day\nwork, exercise, family\n0\n",
 			expectedEntries: []domain.MoodEntry{
-				{Mood: 8, Note: "Great day"},
+				{
+					Mood: 8,
+					Note: "Great day",
+					Tags: []string{"work", "exercise", "family"},
+				},
+			},
+		},
+		{
+			name:           "test add entry with tags containing spaces/empty values",
+			initialEntries: nil,
+			input:          "1\n8\nGreat day\nwork, exercise, , family,\n0\n",
+			expectedEntries: []domain.MoodEntry{
+				{
+					Mood: 8,
+					Note: "Great day",
+					Tags: []string{"work", "exercise", "family"},
+				},
 			},
 		},
 		{
 			name: "test edit entry",
 			initialEntries: []domain.MoodEntry{
-				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
 			},
-			input: "2\n1\n8\nGreat day\n0\n",
+			input: "2\n1\n8\nGreat day\n\n0\n",
 			expectedEntries: []domain.MoodEntry{
-				{Mood: 8, Note: "Great day"},
+				{Mood: 8, Note: "Great day", Tags: []string{}},
 			},
 		},
 		{
@@ -78,14 +95,14 @@ func TestCLI(t *testing.T) {
 		},
 		{
 			name:            "test edit entry invalid index",
-			initialEntries:  []domain.MoodEntry{{Mood: 2, Note: "Bad day"}},
+			initialEntries:  []domain.MoodEntry{{Mood: 2, Note: "Bad day", Tags: []string{}}},
 			input:           "2\n7\n0\n",
-			expectedEntries: []domain.MoodEntry{{Mood: 2, Note: "Bad day"}},
+			expectedEntries: []domain.MoodEntry{{Mood: 2, Note: "Bad day", Tags: []string{}}},
 		},
 		{
 			name: "test removing entry",
 			initialEntries: []domain.MoodEntry{
-				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
 			},
 			input:           "3\n1\n0\n",
 			expectedEntries: []domain.MoodEntry{},
@@ -99,9 +116,9 @@ func TestCLI(t *testing.T) {
 		{
 			name: "test removing ALL entries success",
 			initialEntries: []domain.MoodEntry{
-				{Mood: 2, Note: "Bad day"},
-				{Mood: 2, Note: "Bad day"},
-				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
 			},
 			input:           "7\nyes\n0\n",
 			expectedEntries: []domain.MoodEntry{},
@@ -109,29 +126,29 @@ func TestCLI(t *testing.T) {
 		{
 			name: "test removing ALL entries rejection",
 			initialEntries: []domain.MoodEntry{
-				{Mood: 2, Note: "Bad day"},
-				{Mood: 2, Note: "Bad day"},
-				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
 			},
 			input: "7\nno\n0\n",
 			expectedEntries: []domain.MoodEntry{
-				{Mood: 2, Note: "Bad day"},
-				{Mood: 2, Note: "Bad day"},
-				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
 			},
 		},
 		{
 			name: "test removing ALL entries invalid confirmation",
 			initialEntries: []domain.MoodEntry{
-				{Mood: 2, Note: "Bad day"},
-				{Mood: 2, Note: "Bad day"},
-				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
 			},
 			input: "7\nabc\n0\n",
 			expectedEntries: []domain.MoodEntry{
-				{Mood: 2, Note: "Bad day"},
-				{Mood: 2, Note: "Bad day"},
-				{Mood: 2, Note: "Bad day"},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
+				{Mood: 2, Note: "Bad day", Tags: []string{}},
 			},
 		},
 		{
@@ -182,6 +199,13 @@ func TestCLI(t *testing.T) {
 						i,
 						expected.Note,
 						actual.Note)
+				}
+
+				if !reflect.DeepEqual(actual.Tags, expected.Tags) {
+					t.Errorf("entry %d: expected tags %#v, got %#v",
+						i,
+						expected.Tags,
+						actual.Tags)
 				}
 			}
 		})

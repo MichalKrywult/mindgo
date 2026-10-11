@@ -29,12 +29,25 @@ func (tracker *MoodTracker) createTrackerBackup() backupMoodTracker {
 	backupEntries := make([]domain.MoodEntry, len(tracker.entries))
 	copy(backupEntries, tracker.entries)
 
+	for i := range len(tracker.entries) {
+		backupEntries[i].Tags = make([]string, len(tracker.entries[i].Tags))
+		copy(backupEntries[i].Tags, tracker.entries[i].Tags)
+	}
+
 	backupEntryID := tracker.entryID
 	return backupMoodTracker{entries: backupEntries, entryID: backupEntryID}
 }
 
 func (tracker *MoodTracker) restoreTrackerFromBackup(backup backupMoodTracker) {
-	tracker.entries = backup.entries
+	tracker.entries = make([]domain.MoodEntry, len(backup.entries))
+
+	for i, entry := range backup.entries {
+		tracker.entries[i] = entry
+
+		tracker.entries[i].Tags = make([]string, len(entry.Tags))
+		copy(tracker.entries[i].Tags, entry.Tags)
+	}
+
 	tracker.entryID = backup.entryID
 }
 
@@ -70,10 +83,13 @@ func (tracker *MoodTracker) validateIndex(index int) error {
 
 func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {
 	entries := make([]domain.MoodEntry, len(tracker.entries))
-	//we have to create space for that copy with make()
-	// copy() doesn't make a slice bigger
 	copy(entries, tracker.entries)
-	//now we can copy tracker.entries into entries
+
+	for i := range entries {
+		entries[i].Tags = make([]string, len(tracker.entries[i].Tags))
+		copy(entries[i].Tags, tracker.entries[i].Tags)
+	}
+	// each Tag set in entry has its own make/copy
 
 	return entries
 }

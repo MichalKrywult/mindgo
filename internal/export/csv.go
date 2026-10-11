@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/MichalKrywult/mindgo/internal/config"
 	"github.com/MichalKrywult/mindgo/internal/domain"
@@ -19,16 +20,22 @@ func exportCSV(entries []domain.MoodEntry, w io.Writer) error {
 			strconv.Itoa(entry.ID),                 // converts int to string
 			strconv.Itoa(entry.Mood),               // converts int to string
 			entry.Date.Format("2006-01-02T15:04Z"), // converts date to string (fixed date format)
-			entry.Note})
+			entry.Note,
+			strings.Join(entry.Tags, ","), // joins tags to one string
+		})
+
 		if err != nil {
 			return err
 		}
 	}
+
 	csWriter.Flush() // function that empties the buffor
+
 	err := csWriter.Error()
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

@@ -15,13 +15,17 @@ type MoodEntry struct {
 	Mood int       `json:"mood"`
 	Date time.Time `json:"date"`
 	Note string    `json:"note"`
+	Tags []string  `json:"tags"`
 }
 
-func NewMoodEntry(mood int, date time.Time, note string) (MoodEntry, error) {
+func NewMoodEntry(mood int, date time.Time, note string, tags []string) (MoodEntry, error) {
 	if mood < MinMoodValue || mood > MaxMoodValue {
 		return MoodEntry{}, errors.New("invalid Mood range")
 	}
 
-	moodEntry := MoodEntry{Mood: mood, Date: date, Note: note}
+	copyTags := make([]string, len(tags))
+	copy(copyTags, tags)
+
+	moodEntry := MoodEntry{Mood: mood, Date: date, Note: note, Tags: copyTags}
 	return moodEntry, nil
 }

@@ -96,3 +96,59 @@ func CalculateStatsByWeekday(entries []domain.MoodEntry) map[time.Weekday]float6
 
 	return averages
 }
+
+func CalculateStatsByTag(entries []domain.MoodEntry) map[string]Summary {
+
+	tagStats := make(map[string]struct {
+		Sum   float64
+		Count int
+		Min   int
+		Max   int
+	})
+
+	for _, entry := range entries {
+		seen := make(map[string]bool)
+
+		for _, tag := range entry.Tags {
+			if seen[tag] == true {
+				continue
+			}
+
+			seen[tag] = true
+
+			stats, exists := tagStats[tag]
+			mood := entry.Mood
+			stats.Sum += float64(mood)
+			stats.Count++
+
+			if !exists {
+				stats.Max = mood
+				stats.Min = mood
+				tagStats[tag] = stats
+				continue
+			}
+
+			if mood > stats.Max {
+				stats.Max = mood
+			}
+
+			if mood < stats.Min {
+				stats.Min = mood
+			}
+
+			tagStats[tag] = stats
+		}
+	}
+
+	tags := make(map[string]Summary)
+	for tag, stats := range tagStats {
+		tags[tag] = Summary{
+			TotalCount: stats.Count,
+			MaxMood:    stats.Max,
+			MinMood:    stats.Min,
+			Average:    stats.Sum / float64(stats.Count),
+		}
+	}
+
+	return tags
+}

@@ -35,14 +35,26 @@ func (s *SaveErrorStorage) Load() ([]domain.MoodEntry, error) {
 
 func (m *MockStorage) Save(entries []domain.MoodEntry) error {
 	m.entries = make([]domain.MoodEntry, len(entries))
-	copy(m.entries, entries)
+
+	for i, entry := range entries {
+		m.entries[i] = entry
+
+		m.entries[i].Tags = make([]string, len(entry.Tags))
+		copy(m.entries[i].Tags, entry.Tags)
+	}
 
 	return nil
 }
 
 func (m *MockStorage) Load() ([]domain.MoodEntry, error) {
 	entries := make([]domain.MoodEntry, len(m.entries))
-	copy(entries, m.entries)
+
+	for i, entry := range m.entries {
+		entries[i] = entry
+
+		entries[i].Tags = make([]string, len(m.entries[i].Tags))
+		copy(entries[i].Tags, m.entries[i].Tags)
+	}
 
 	return entries, nil
 }

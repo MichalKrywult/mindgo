@@ -3,21 +3,34 @@ package storage
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
 )
 
 func TestFileStorage_SaveAndLoad(t *testing.T) {
-	// os.MkdirTemp creates temporary dictionary
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "test_moods.json")
 
 	storage := &FileStorage{Filename: filePath}
 
-	entries := []domain.MoodEntry{{Mood: 5, Note: "Test"}}
-	err := storage.Save(entries)
-	if err != nil {
+	entries := []domain.MoodEntry{
+		{
+			ID:   1,
+			Mood: 5,
+			Note: "Test",
+			Tags: []string{"work", "important", "go"},
+		},
+		{
+			ID:   2,
+			Mood: 3,
+			Note: "Sport",
+			Tags: []string{"gym", "cycling"},
+		},
+	}
+
+	if err := storage.Save(entries); err != nil {
 		t.Fatalf("unexpected save error: %v", err)
 	}
 
@@ -26,8 +39,8 @@ func TestFileStorage_SaveAndLoad(t *testing.T) {
 		t.Fatalf("unexpected load error: %v", err)
 	}
 
-	if len(loaded) != 1 || loaded[0].Mood != 5 {
-		t.Errorf("loaded data mismatch")
+	if !reflect.DeepEqual(entries, loaded) {
+		t.Errorf("loaded data mismatch:\nwant: %+v\ngot:  %+v", entries, loaded)
 	}
 }
 
@@ -91,7 +104,13 @@ func TestFileStorage_LoadEmptyFile(t *testing.T) {
 
 func TestMockStorage_SaveCopiesEntries(t *testing.T) {
 	storage := &MockStorage{}
-	entries := []domain.MoodEntry{{Mood: 5, Note: "Old"}}
+	entries := []domain.MoodEntry{
+		{
+			Mood: 5,
+			Note: "Old",
+			Tags: []string{"test1", "test2"},
+		},
+	}
 
 	err := storage.Save(entries)
 	if err != nil {
@@ -100,6 +119,7 @@ func TestMockStorage_SaveCopiesEntries(t *testing.T) {
 
 	entries[0].Mood = 4
 	entries[0].Note = "New"
+	entries[0].Tags[0] = "changed"
 
 	loaded, err := storage.Load()
 	if err != nil {
@@ -107,11 +127,15 @@ func TestMockStorage_SaveCopiesEntries(t *testing.T) {
 	}
 
 	if loaded[0].Mood != 5 {
-		t.Errorf("storage was modified through original slice")
+		t.Errorf("storage was modified through original slice (Mood value)")
 	}
 
 	if loaded[0].Note != "Old" {
-		t.Errorf("storage was modified through original slice")
+		t.Errorf("storage was modified through original slice (Note)")
+	}
+
+	if loaded[0].Tags[0] != "test1" {
+		t.Errorf("storage was modified through original slice (Tags)")
 	}
 }
 func TestMockStorage_LoadCopiesEntries(t *testing.T) {
