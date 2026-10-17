@@ -24,11 +24,11 @@ func NewMoodEntry(mood int, date time.Time, note string, tags []string) (MoodEnt
 	}
 
 	seen := make(map[string]bool, len(tags))
-	for _,tag := range tags{
-		if seen[tag]==true{
+	for _, tag := range tags {
+		if seen[tag] == true {
 			return MoodEntry{}, errors.New("duplicate tags are not allowed")
 		}
-		seen[tag]=true
+		seen[tag] = true
 	}
 
 	copyTags := make([]string, len(tags))
