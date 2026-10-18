@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -19,6 +20,13 @@ type CLI struct {
 	tracker *tracker.MoodTracker
 	scanner *bufio.Scanner
 }
+
+type SortMode int
+
+const (
+	SortByDateNewest SortMode = iota // untyped int that is used in const, zero indexed
+	SortByDateOldest
+)
 
 func NewCLI(tracker *tracker.MoodTracker, input io.Reader) *CLI {
 	return &CLI{
@@ -62,7 +70,7 @@ func (cli *CLI) confirmAction(prompt string) (bool, error) {
 	return false, nil
 }
 
-func (cli *CLI) displayMenuAndReadChoice() (int, error) {
+func (cli *CLI) displayMainMenuAndReadChoice() (int, error) {
 	fmt.Println("=====MENU=====")
 	fmt.Println("1. New entry")
 	fmt.Println("2. Edit entry")
@@ -90,11 +98,28 @@ func (cli *CLI) isIndexValid(index int) bool {
 	return index >= 0 && index < len(cli.tracker.GetEntries())
 }
 
-func (cli *CLI) displayAllEntries() {
+func (cli *CLI) displayAllEntries(mode SortMode) {
+
 	entries := cli.tracker.GetEntries()
 
 	if len(entries) == 0 {
 		fmt.Println("You don't have any entries")
+		return
+	}
+
+	switch mode {
+	case SortByDateNewest:
+		sort.Slice(entries, func(i, j int) bool {
+			return entries[i].Date.After(entries[j].Date)
+			//anonymous func that compares i,j (indexes in slice)
+			//whether they need to be switched
+		})
+	case SortByDateOldest:
+		sort.Slice(entries, func(i, j int) bool {
+			return entries[i].Date.Before(entries[j].Date)
+		})
+	default:
+		fmt.Println("Invalid sort choice")
 		return
 	}
 
@@ -316,7 +341,7 @@ func (cli *CLI) handleExport() error {
 
 func (cli *CLI) Show() {
 	for {
-		choice, err := cli.displayMenuAndReadChoice()
+		choice, err := cli.displayMainMenuAndReadChoice()
 		if err != nil {
 			if errors.Is(err, io.EOF) {
 				return
