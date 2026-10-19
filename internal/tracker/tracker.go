@@ -181,6 +181,23 @@ func (tracker *MoodTracker) RemoveEntryByIndex(index int) error {
 	return nil
 }
 
+func (tracker *MoodTracker) RemoveEntryByID(ID int) error {
+    index, err := tracker.findIndexByID(ID)
+    if err != nil {
+        return err
+    }
+
+    backup := tracker.createTrackerBackup()
+    tracker.entries = append(tracker.entries[:index], tracker.entries[index+1:]...)
+
+    if err := tracker.save(); err != nil {
+        tracker.restoreTrackerFromBackup(backup)
+        return err
+    }
+
+    return nil
+}
+
 func (tracker *MoodTracker) RemoveAllEntries() error {
 	backup := tracker.createTrackerBackup()
 
