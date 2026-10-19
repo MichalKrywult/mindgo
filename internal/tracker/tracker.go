@@ -82,9 +82,9 @@ func (tracker *MoodTracker) validateIndex(index int) error {
 	return nil
 }
 
-func (tracker *MoodTracker) findIndexByID(ID int) (int, error){
-	for i, entry := range tracker.entries{
-		if entry.ID==ID{
+func (tracker *MoodTracker) findIndexByID(ID int) (int, error) {
+	for i, entry := range tracker.entries {
+		if entry.ID == ID {
 			return i, nil
 		}
 	}
@@ -124,6 +124,26 @@ func (tracker *MoodTracker) AddEntry(entry domain.MoodEntry) error {
 
 func (tracker *MoodTracker) EditEntryByIndex(index int, newEntry domain.MoodEntry) error {
 	if err := tracker.validateIndex(index); err != nil {
+		return err
+	}
+
+	backup := tracker.createTrackerBackup()
+
+	oldEntry := tracker.entries[index]
+	newEntry.ID = oldEntry.ID
+	tracker.entries[index] = newEntry
+
+	if err := tracker.save(); err != nil {
+		tracker.restoreTrackerFromBackup(backup)
+		return err
+	}
+
+	return nil
+}
+
+func (tracker *MoodTracker) EditEntryByID(ID int, newEntry domain.MoodEntry) error {
+	index, err := tracker.findIndexByID(ID)
+	if err != nil {
 		return err
 	}
 
