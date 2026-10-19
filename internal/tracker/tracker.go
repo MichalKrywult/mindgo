@@ -1,6 +1,7 @@
 package tracker
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
@@ -79,6 +80,16 @@ func (tracker *MoodTracker) validateIndex(index int) error {
 		return fmt.Errorf("invalid entry number")
 	}
 	return nil
+}
+
+func (tracker *MoodTracker) findIndexByID(ID int) (int, error){
+	for i, entry := range tracker.entries{
+		if entry.ID==ID{
+			return i, nil
+		}
+	}
+
+	return 0, errors.New("invalid ID")
 }
 
 func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {

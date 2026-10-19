@@ -98,6 +98,23 @@ func (cli *CLI) isIndexValid(index int) bool {
 	return index >= 0 && index < len(cli.tracker.GetEntries())
 }
 
+func (cli *CLI) convertDisplayedNumberToIndex(choice int, sortedIndexToID map[int]int) (int, error){
+	entries := cli.tracker.GetEntries()
+
+	ID,ok := sortedIndexToID[choice]
+	if !ok{
+		return 0, errors.New("Invalid choice")
+	}
+
+	for i, entry := range entries{
+		if entry.ID == ID{
+			return i,nil
+		}
+	}
+
+	return 0, errors.New("Invalid choice")
+}
+
 func (cli *CLI) handleDisplayingAllEntries() error {
 	if !cli.hasEntries() {
 		return errors.New("you don't have any entries")
@@ -131,13 +148,12 @@ func (cli *CLI) handleDisplayingAllEntries() error {
 	return nil
 }
 
-func (cli *CLI) displayAllEntries(mode SortMode) {
+func (cli *CLI) displayAllEntries(mode SortMode)  (map[int]int, error){
 
 	entries := cli.tracker.GetEntries()
 
 	if len(entries) == 0 {
-		fmt.Println("You don't have any entries")
-		return
+		return map[int]int{}, errors.New("You don't have any entries")
 	}
 
 	switch mode {
@@ -152,9 +168,10 @@ func (cli *CLI) displayAllEntries(mode SortMode) {
 			return entries[i].Date.Before(entries[j].Date)
 		})
 	default:
-		fmt.Println("Invalid sort choice")
-		return
+		return map[int]int{}, errors.New("Invalid sort choice")
 	}
+
+	sortedIndexToID := make(map[int]int, len(entries))
 
 	fmt.Println("All of your entries:")
 	for i := range entries {
@@ -166,7 +183,11 @@ func (cli *CLI) displayAllEntries(mode SortMode) {
 			entries[i].Note,
 			strings.Join(entries[i].Tags, ", "),
 		)
+
+		sortedIndexToID[i]=entries[i].ID
 	}
+
+	return sortedIndexToID, nil
 }
 
 func (cli *CLI) readNewMoodEntry() (domain.MoodEntry, error) {
