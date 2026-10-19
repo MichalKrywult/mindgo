@@ -98,7 +98,7 @@ func (cli *CLI) isIndexValid(index int) bool {
 	return index >= 0 && index < len(cli.tracker.GetEntries())
 }
 
-func (cli *CLI) handleDisplayingEntries() error {
+func (cli *CLI) handleDisplayingAllEntries() error {
 	if !cli.hasEntries() {
 		return errors.New("you don't have any entries")
 	}
@@ -228,7 +228,7 @@ func (cli *CLI) handleEditEntry() error {
 	fmt.Println("Number of entry to edit:")
 	choice, err := cli.readInt()
 	if err != nil {
-		return errors.New("invalid entry")
+		return err
 	}
 
 	index := choice - 1
@@ -413,7 +413,7 @@ func (cli *CLI) Show() {
 			fmt.Println("Entry removed!")
 
 		case 4:
-			err := cli.handleDisplayingEntries()
+			err := cli.handleDisplayingAllEntries()
 			if err != nil {
 				fmt.Println(err)
 			}
