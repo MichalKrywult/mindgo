@@ -98,6 +98,39 @@ func (cli *CLI) isIndexValid(index int) bool {
 	return index >= 0 && index < len(cli.tracker.GetEntries())
 }
 
+func (cli *CLI) handleDisplayingEntries() error {
+	if !cli.hasEntries() {
+		return errors.New("you don't have any entries")
+	}
+
+	fmt.Println("How to sort them?")
+	fmt.Println("1. Newest to oldest")
+	fmt.Println("2. Oldest to newest")
+	fmt.Println("0. Go back")
+
+	fmt.Println("Your choice:")
+	choice, err := cli.readInt()
+	if err != nil {
+		return errors.New("invalid choice")
+	}
+
+	if choice == 0 {
+		return nil
+	}
+
+	mode := SortMode(choice)
+	switch mode {
+	case SortByDateNewest:
+		cli.displayAllEntries(SortByDateNewest)
+	case SortByDateOldest:
+		cli.displayAllEntries(SortByDateOldest)
+	default:
+		return errors.New("invalid choice")
+	}
+
+	return nil
+}
+
 func (cli *CLI) displayAllEntries(mode SortMode) {
 
 	entries := cli.tracker.GetEntries()
@@ -190,7 +223,7 @@ func (cli *CLI) handleEditEntry() error {
 	}
 
 	fmt.Println("Which entry would you like to edit?")
-	cli.displayAllEntries()
+	cli.displayAllEntries(SortByDateNewest)
 
 	fmt.Println("Number of entry to edit:")
 	choice, err := cli.readInt()
@@ -223,7 +256,7 @@ func (cli *CLI) handleRemoveEntry() error {
 	}
 
 	fmt.Println("Which entry would you like to delete?")
-	cli.displayAllEntries()
+	cli.displayAllEntries(SortByDateNewest)
 
 	fmt.Println("Number of entry to delete:")
 	choice, err := cli.readInt()
@@ -380,7 +413,10 @@ func (cli *CLI) Show() {
 			fmt.Println("Entry removed!")
 
 		case 4:
-			cli.displayAllEntries()
+			err := cli.handleDisplayingEntries()
+			if err != nil {
+				fmt.Println(err)
+			}
 
 		case 5:
 			err := cli.handleStatistics()
