@@ -133,7 +133,8 @@ func (tracker *MoodTracker) EditEntryByIndex(index int, newEntry domain.MoodEntr
 	newEntry.ID = oldEntry.ID
 	tracker.entries[index] = newEntry
 
-	if err := tracker.save(); err != nil {
+	err := tracker.save()
+	if err != nil {
 		tracker.restoreTrackerFromBackup(backup)
 		return err
 	}
@@ -153,7 +154,8 @@ func (tracker *MoodTracker) EditEntryByID(ID int, newEntry domain.MoodEntry) err
 	newEntry.ID = oldEntry.ID
 	tracker.entries[index] = newEntry
 
-	if err := tracker.save(); err != nil {
+	err = tracker.save()
+	if err != nil {
 		tracker.restoreTrackerFromBackup(backup)
 		return err
 	}
@@ -173,7 +175,8 @@ func (tracker *MoodTracker) RemoveEntryByIndex(index int) error {
 		tracker.entries[index+1:]...,
 	)
 
-	if err := tracker.save(); err != nil {
+	err := tracker.save()
+	if err != nil {
 		tracker.restoreTrackerFromBackup(backup)
 		return err
 	}
@@ -182,20 +185,21 @@ func (tracker *MoodTracker) RemoveEntryByIndex(index int) error {
 }
 
 func (tracker *MoodTracker) RemoveEntryByID(ID int) error {
-    index, err := tracker.findIndexByID(ID)
-    if err != nil {
-        return err
-    }
+	index, err := tracker.findIndexByID(ID)
+	if err != nil {
+		return err
+	}
 
-    backup := tracker.createTrackerBackup()
-    tracker.entries = append(tracker.entries[:index], tracker.entries[index+1:]...)
+	backup := tracker.createTrackerBackup()
+	tracker.entries = append(tracker.entries[:index], tracker.entries[index+1:]...)
 
-    if err := tracker.save(); err != nil {
-        tracker.restoreTrackerFromBackup(backup)
-        return err
-    }
+	err = tracker.save()
+	if err != nil {
+		tracker.restoreTrackerFromBackup(backup)
+		return err
+	}
 
-    return nil
+	return nil
 }
 
 func (tracker *MoodTracker) RemoveAllEntries() error {

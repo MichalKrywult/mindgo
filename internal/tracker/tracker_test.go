@@ -310,6 +310,110 @@ func TestRemoveEntryByIndex(t *testing.T) {
 	}
 }
 
+func TestEditEntryByID(t *testing.T) {
+	tests := []struct {
+		name            string
+		ID              int
+		entry           domain.MoodEntry
+		initialEntries  []domain.MoodEntry
+		expectedEntries []domain.MoodEntry
+		expectedError   bool
+	}{
+		{
+			name:            "negative ID",
+			initialEntries:  []domain.MoodEntry{},
+			ID:              -1,
+			entry:           domain.MoodEntry{Mood: 2, Note: "Test", Tags: []string{"test1", "test2"}},
+			expectedEntries: []domain.MoodEntry{},
+			expectedError:   true,
+		},
+		{
+			name:            "empty tracker",
+			initialEntries:  []domain.MoodEntry{},
+			ID:              1,
+			entry:           domain.MoodEntry{Mood: 2, Note: "Test", Tags: []string{"test1", "test2"}},
+			expectedEntries: []domain.MoodEntry{},
+			expectedError:   true,
+		},
+		{
+			name: "valid ID",
+			initialEntries: []domain.MoodEntry{
+				{ID: 1, Mood: 3, Note: "First", Tags: []string{"tag1"}},
+				{ID: 2, Mood: 4, Note: "Original", Tags: []string{"test3", "test4"}},
+				{ID: 3, Mood: 2, Note: "Third", Tags: []string{"tag3"}},
+				{ID: 4, Mood: 5, Note: "Fourth", Tags: []string{"tag4"}},
+			},
+			ID: 2,
+			entry: domain.MoodEntry{
+				Mood: 5,
+				Note: "Updated",
+				Tags: []string{"test1", "test2"},
+			},
+			expectedEntries: []domain.MoodEntry{
+				{ID: 1, Mood: 3, Note: "First", Tags: []string{"tag1"}},
+				{ID: 2, Mood: 5, Note: "Updated", Tags: []string{"test1", "test2"}},
+				{ID: 3, Mood: 2, Note: "Third", Tags: []string{"tag3"}},
+				{ID: 4, Mood: 5, Note: "Fourth", Tags: []string{"tag4"}},
+			},
+			expectedError: false,
+		},
+		{
+			name: "nonexistent ID in non-empty tracker",
+			initialEntries: []domain.MoodEntry{
+				{ID: 1, Mood: 3, Note: "First", Tags: []string{"tag1"}},
+				{ID: 2, Mood: 4, Note: "Second", Tags: []string{"tag2"}},
+				{ID: 3, Mood: 2, Note: "Third", Tags: []string{"tag3"}},
+				{ID: 4, Mood: 5, Note: "Fourth", Tags: []string{"tag4"}},
+			},
+			ID: 999,
+			entry: domain.MoodEntry{
+				Mood: 5,
+				Note: "Updated",
+				Tags: []string{"test1", "test2"},
+			},
+			expectedEntries: []domain.MoodEntry{
+				{ID: 1, Mood: 3, Note: "First", Tags: []string{"tag1"}},
+				{ID: 2, Mood: 4, Note: "Second", Tags: []string{"tag2"}},
+				{ID: 3, Mood: 2, Note: "Third", Tags: []string{"tag3"}},
+				{ID: 4, Mood: 5, Note: "Fourth", Tags: []string{"tag4"}},
+			},
+			expectedError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockStorage := &storage.MockStorage{}
+
+			err := mockStorage.Save(tt.initialEntries)
+			if err != nil {
+				t.Fatalf("failed to save initial entries: %v", err)
+			}
+
+			tracker, err := NewMoodTracker(mockStorage)
+			if err != nil {
+				t.Fatalf("failed to create tracker: %v", err)
+			}
+
+			err = tracker.EditEntryByID(tt.ID, tt.entry)
+
+			if tt.expectedError {
+				if err == nil {
+					t.Fatal("expected an error, got nil")
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("expected no error, got %v", err)
+				}
+			}
+
+			if !reflect.DeepEqual(tracker.GetEntries(), tt.expectedEntries) {
+				t.Errorf("expected entries to be %+v, got %+v", tt.expectedEntries, tracker.GetEntries())
+			}
+		})
+	}
+}
+
 func TestCreatingTrackerBackup(t *testing.T) {
 	tracker, err := NewMoodTracker(&storage.MockStorage{})
 	if err != nil {
