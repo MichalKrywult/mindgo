@@ -320,7 +320,7 @@ func TestEditEntryByID(t *testing.T) {
 		expectedError   bool
 	}{
 		{
-			name:            "negative ID",
+			name:            "edit negative ID",
 			initialEntries:  []domain.MoodEntry{},
 			ID:              -1,
 			entry:           domain.MoodEntry{Mood: 2, Note: "Test", Tags: []string{"test1", "test2"}},
@@ -328,7 +328,7 @@ func TestEditEntryByID(t *testing.T) {
 			expectedError:   true,
 		},
 		{
-			name:            "empty tracker",
+			name:            "edit empty tracker",
 			initialEntries:  []domain.MoodEntry{},
 			ID:              1,
 			entry:           domain.MoodEntry{Mood: 2, Note: "Test", Tags: []string{"test1", "test2"}},
@@ -336,7 +336,7 @@ func TestEditEntryByID(t *testing.T) {
 			expectedError:   true,
 		},
 		{
-			name: "valid ID",
+			name: "edit valid ID",
 			initialEntries: []domain.MoodEntry{
 				{ID: 1, Mood: 3, Note: "First", Tags: []string{"tag1"}},
 				{ID: 2, Mood: 4, Note: "Original", Tags: []string{"test3", "test4"}},
@@ -358,7 +358,7 @@ func TestEditEntryByID(t *testing.T) {
 			expectedError: false,
 		},
 		{
-			name: "nonexistent ID in non-empty tracker",
+			name: "edit nonexistent ID in non-empty tracker",
 			initialEntries: []domain.MoodEntry{
 				{ID: 1, Mood: 3, Note: "First", Tags: []string{"tag1"}},
 				{ID: 2, Mood: 4, Note: "Second", Tags: []string{"tag2"}},
@@ -396,6 +396,96 @@ func TestEditEntryByID(t *testing.T) {
 			}
 
 			err = tracker.EditEntryByID(tt.ID, tt.entry)
+
+			if tt.expectedError {
+				if err == nil {
+					t.Fatal("expected an error, got nil")
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("expected no error, got %v", err)
+				}
+			}
+
+			if !reflect.DeepEqual(tracker.GetEntries(), tt.expectedEntries) {
+				t.Errorf("expected entries to be %+v, got %+v", tt.expectedEntries, tracker.GetEntries())
+			}
+		})
+	}
+}
+
+func RemoveEntryByID(t *testing.T) {
+
+	tests := []struct {
+		name            string
+		ID              int
+		initialEntries  []domain.MoodEntry
+		expectedEntries []domain.MoodEntry
+		expectedError   bool
+	}{
+		{
+			name: "remove entry",
+			ID:   1,
+			initialEntries: []domain.MoodEntry{
+				{ID: 1, Mood: 2, Note: "Feeling good", Tags: []string{"happy"}},
+				{ID: 2, Mood: 4, Note: "Feeling tired", Tags: []string{"tired"}},
+			},
+			expectedEntries: []domain.MoodEntry{
+				{ID: 2, Mood: 4, Note: "Feeling tired", Tags: []string{"tired"}},
+			},
+			expectedError: false,
+		},
+		{
+			name: "remove non-existing entry",
+			ID:   999,
+			initialEntries: []domain.MoodEntry{
+				{ID: 1, Mood: 2, Note: "Feeling good", Tags: []string{"happy"}},
+				{ID: 2, Mood: 4, Note: "Feeling tired", Tags: []string{"tired"}},
+			},
+			expectedEntries: []domain.MoodEntry{
+				{ID: 1, Mood: 2, Note: "Feeling good", Tags: []string{"happy"}},
+				{ID: 2, Mood: 4, Note: "Feeling tired", Tags: []string{"tired"}},
+			},
+			expectedError: true,
+		},
+		{
+			name:            "remove entry from empty list",
+			ID:              1,
+			initialEntries:  []domain.MoodEntry{},
+			expectedEntries: []domain.MoodEntry{},
+			expectedError:   true,
+		},
+		{
+			name: "remove middle entry",
+			ID:   2,
+			initialEntries: []domain.MoodEntry{
+				{ID: 1, Mood: 1, Note: "Feeling sad", Tags: []string{"sad"}},
+				{ID: 2, Mood: 3, Note: "Feeling okay", Tags: []string{"neutral"}},
+				{ID: 3, Mood: 5, Note: "Feeling great", Tags: []string{"happy", "energetic"}},
+			},
+			expectedEntries: []domain.MoodEntry{
+				{ID: 1, Mood: 1, Note: "Feeling sad", Tags: []string{"sad"}},
+				{ID: 3, Mood: 5, Note: "Feeling great", Tags: []string{"happy", "energetic"}},
+			},
+			expectedError: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockStorage := &storage.MockStorage{}
+
+			err := mockStorage.Save(tt.initialEntries)
+			if err != nil {
+				t.Fatalf("failed to save initial entries: %v", err)
+			}
+
+			tracker, err := NewMoodTracker(mockStorage)
+			if err != nil {
+				t.Fatalf("failed to create tracker: %v", err)
+			}
+
+			err = tracker.RemoveEntryByID(tt.ID)
 
 			if tt.expectedError {
 				if err == nil {
