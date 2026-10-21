@@ -98,23 +98,6 @@ func (cli *CLI) isIndexValid(index int) bool {
 	return index >= 0 && index < len(cli.tracker.GetEntries())
 }
 
-func (cli *CLI) convertDisplayedNumberToIndex(choice int, sortedIndexToID map[int]int) (int, error){
-	entries := cli.tracker.GetEntries()
-
-	ID,ok := sortedIndexToID[choice]
-	if !ok{
-		return 0, errors.New("Invalid choice")
-	}
-
-	for i, entry := range entries{
-		if entry.ID == ID{
-			return i,nil
-		}
-	}
-
-	return 0, errors.New("Invalid choice")
-}
-
 func (cli *CLI) handleDisplayingAllEntries() error {
 	if !cli.hasEntries() {
 		return errors.New("you don't have any entries")
@@ -131,24 +114,21 @@ func (cli *CLI) handleDisplayingAllEntries() error {
 		return errors.New("invalid choice")
 	}
 
-	if choice == 0 {
+	switch choice {
+	case 0:
 		return nil
-	}
-
-	mode := SortMode(choice)
-	switch mode {
-	case SortByDateNewest:
-		cli.displayAllEntries(SortByDateNewest)
-	case SortByDateOldest:
-		cli.displayAllEntries(SortByDateOldest)
+	case 1:
+		_, err := cli.displayAllEntries(SortByDateNewest)
+		return err
+	case 2:
+		_, err := cli.displayAllEntries(SortByDateOldest)
+		return err
 	default:
 		return errors.New("invalid choice")
 	}
-
-	return nil
 }
 
-func (cli *CLI) displayAllEntries(mode SortMode)  (map[int]int, error){
+func (cli *CLI) displayAllEntries(mode SortMode) (map[int]int, error) {
 
 	entries := cli.tracker.GetEntries()
 
@@ -184,7 +164,7 @@ func (cli *CLI) displayAllEntries(mode SortMode)  (map[int]int, error){
 			strings.Join(entries[i].Tags, ", "),
 		)
 
-		sortedIndexToID[i]=entries[i].ID
+		sortedIndexToID[i+1] = entries[i].ID
 	}
 
 	return sortedIndexToID, nil
@@ -244,7 +224,10 @@ func (cli *CLI) handleEditEntry() error {
 	}
 
 	fmt.Println("Which entry would you like to edit?")
-	cli.displayAllEntries(SortByDateNewest)
+	indexToID, err := cli.displayAllEntries(SortByDateNewest)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("Number of entry to edit:")
 	choice, err := cli.readInt()
@@ -252,9 +235,10 @@ func (cli *CLI) handleEditEntry() error {
 		return err
 	}
 
-	index := choice - 1
+	ID := indexToID[choice]
 
-	if !cli.isIndexValid(index) {
+	ID, exists := indexToID[choice]
+	if !exists {
 		return errors.New("invalid entry number")
 	}
 
@@ -263,7 +247,7 @@ func (cli *CLI) handleEditEntry() error {
 		return fmt.Errorf("failed to read new entry: %w", err)
 	}
 
-	err = cli.tracker.EditEntryByIndex(index, entry)
+	err = cli.tracker.EditEntryByID(ID, entry)
 	if err != nil {
 		return fmt.Errorf("failed to edit entry: %w", err)
 	}
@@ -277,7 +261,10 @@ func (cli *CLI) handleRemoveEntry() error {
 	}
 
 	fmt.Println("Which entry would you like to delete?")
-	cli.displayAllEntries(SortByDateNewest)
+	indexToID, err := cli.displayAllEntries(SortByDateNewest)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("Number of entry to delete:")
 	choice, err := cli.readInt()
@@ -285,13 +272,12 @@ func (cli *CLI) handleRemoveEntry() error {
 		return errors.New("invalid entry")
 	}
 
-	index := choice - 1
-
-	if !cli.isIndexValid(index) {
+	ID, exists := indexToID[choice]
+	if !exists {
 		return errors.New("invalid entry number")
 	}
-
-	err = cli.tracker.RemoveEntryByIndex(index)
+	
+	err = cli.tracker.RemoveEntryByID(ID)
 	if err != nil {
 		return fmt.Errorf("failed to remove entry: %w", err)
 	}
