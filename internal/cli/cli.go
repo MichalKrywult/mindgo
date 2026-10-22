@@ -26,6 +26,8 @@ type SortMode int
 const (
 	SortByDateNewest SortMode = iota // untyped int that is used in const, zero indexed
 	SortByDateOldest
+	SortByMoodLowest
+	SortByMoodHighest
 )
 
 func NewCLI(tracker *tracker.MoodTracker, input io.Reader) *CLI {
@@ -106,6 +108,8 @@ func (cli *CLI) handleDisplayingAllEntries() error {
 	fmt.Println("How to sort them?")
 	fmt.Println("1. Newest to oldest")
 	fmt.Println("2. Oldest to newest")
+	fmt.Println("3. Lowest mood to highest")
+	fmt.Println("4. Higest mood to lowest")
 	fmt.Println("0. Go back")
 
 	fmt.Println("Your choice:")
@@ -122,6 +126,12 @@ func (cli *CLI) handleDisplayingAllEntries() error {
 		return err
 	case 2:
 		_, err := cli.displayAllEntries(SortByDateOldest)
+		return err
+	case 3:
+		_, err := cli.displayAllEntries(SortByMoodLowest)
+		return err
+	case 4:
+		_, err := cli.displayAllEntries(SortByMoodHighest)
 		return err
 	default:
 		return errors.New("invalid choice")
@@ -146,6 +156,14 @@ func (cli *CLI) displayAllEntries(mode SortMode) (map[int]int, error) {
 	case SortByDateOldest:
 		sort.Slice(entries, func(i, j int) bool {
 			return entries[i].Date.Before(entries[j].Date)
+		})
+	case SortByMoodLowest:
+		sort.Slice(entries, func(i, j int) bool {
+			return entries[i].Mood < entries[j].Mood
+		})
+	case SortByMoodHighest:
+		sort.Slice(entries, func(i, j int) bool {
+			return entries[i].Mood > entries[j].Mood
 		})
 	default:
 		return map[int]int{}, errors.New("Invalid sort choice")
@@ -276,7 +294,7 @@ func (cli *CLI) handleRemoveEntry() error {
 	if !exists {
 		return errors.New("invalid entry number")
 	}
-	
+
 	err = cli.tracker.RemoveEntryByID(ID)
 	if err != nil {
 		return fmt.Errorf("failed to remove entry: %w", err)
