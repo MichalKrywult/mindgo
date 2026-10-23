@@ -1,6 +1,7 @@
 package tracker
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
@@ -81,6 +82,16 @@ func (tracker *MoodTracker) validateIndex(index int) error {
 	return nil
 }
 
+func (tracker *MoodTracker) findIndexByID(ID int) (int, error) {
+	for i, entry := range tracker.entries {
+		if entry.ID == ID {
+			return i, nil
+		}
+	}
+
+	return 0, errors.New("invalid ID")
+}
+
 func (tracker *MoodTracker) GetEntries() []domain.MoodEntry {
 	entries := make([]domain.MoodEntry, len(tracker.entries))
 	copy(entries, tracker.entries)
@@ -122,7 +133,29 @@ func (tracker *MoodTracker) EditEntryByIndex(index int, newEntry domain.MoodEntr
 	newEntry.ID = oldEntry.ID
 	tracker.entries[index] = newEntry
 
-	if err := tracker.save(); err != nil {
+	err := tracker.save()
+	if err != nil {
+		tracker.restoreTrackerFromBackup(backup)
+		return err
+	}
+
+	return nil
+}
+
+func (tracker *MoodTracker) EditEntryByID(ID int, newEntry domain.MoodEntry) error {
+	index, err := tracker.findIndexByID(ID)
+	if err != nil {
+		return err
+	}
+
+	backup := tracker.createTrackerBackup()
+
+	oldEntry := tracker.entries[index]
+	newEntry.ID = oldEntry.ID
+	tracker.entries[index] = newEntry
+
+	err = tracker.save()
+	if err != nil {
 		tracker.restoreTrackerFromBackup(backup)
 		return err
 	}
@@ -142,7 +175,26 @@ func (tracker *MoodTracker) RemoveEntryByIndex(index int) error {
 		tracker.entries[index+1:]...,
 	)
 
-	if err := tracker.save(); err != nil {
+	err := tracker.save()
+	if err != nil {
+		tracker.restoreTrackerFromBackup(backup)
+		return err
+	}
+
+	return nil
+}
+
+func (tracker *MoodTracker) RemoveEntryByID(ID int) error {
+	index, err := tracker.findIndexByID(ID)
+	if err != nil {
+		return err
+	}
+
+	backup := tracker.createTrackerBackup()
+	tracker.entries = append(tracker.entries[:index], tracker.entries[index+1:]...)
+
+	err = tracker.save()
+	if err != nil {
 		tracker.restoreTrackerFromBackup(backup)
 		return err
 	}
