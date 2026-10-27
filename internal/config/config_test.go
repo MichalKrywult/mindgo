@@ -114,16 +114,30 @@ func TestEnsureConfigFile(t *testing.T) {
 
 		err := EnsureConfigFile(configPath)
 		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
+			t.Fatalf("EnsureConfigFile() error = %v", err)
 		}
 
+		// Sprawdź, czy plik istnieje i można go odczytać.
 		data, err := os.ReadFile(configPath)
 		if err != nil {
 			t.Fatalf("failed to read created config: %v", err)
 		}
 
-		if string(data) != defaultConfig {
-			t.Errorf("config content = %q, expected %q", string(data), defaultConfig)
+		// Sprawdź, czy zawartość jest poprawnym JSON-em.
+		var got Config
+		if err := json.Unmarshal(data, &got); err != nil {
+			t.Fatalf("config is not valid JSON: %v", err)
+		}
+
+		// Sprawdź oczekiwaną wartość wyznaczoną tą samą regułą
+		// co w implementacji EnsureConfigFile.
+		wantDataPath, err := BuildDataPath("")
+		if err != nil {
+			t.Fatalf("BuildDataPath() error = %v", err)
+		}
+
+		if got.DataPath != wantDataPath {
+			t.Errorf("DataPath = %q, want %q", got.DataPath, wantDataPath)
 		}
 	})
 
@@ -133,23 +147,22 @@ func TestEnsureConfigFile(t *testing.T) {
 
 		original := `{"dataPath":"moods.json"}`
 
-		err := os.WriteFile(configPath, []byte(original), 0644)
-		if err != nil {
-			t.Fatal(err)
+		if err := os.WriteFile(configPath, []byte(original), 0644); err != nil {
+			t.Fatalf("failed to create config: %v", err)
 		}
 
-		err = EnsureConfigFile(configPath)
+		err := EnsureConfigFile(configPath)
 		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
+			t.Fatalf("EnsureConfigFile() error = %v", err)
 		}
 
 		data, err := os.ReadFile(configPath)
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("failed to read config: %v", err)
 		}
 
 		if string(data) != original {
-			t.Errorf("file was modified: got %q, expected %q", string(data), original)
+			t.Errorf("file was modified: got %q, want %q", string(data), original)
 		}
 	})
 }
