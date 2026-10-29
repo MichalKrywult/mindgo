@@ -22,21 +22,30 @@ type Config struct {
 
 func EnsureConfigFile(configPath string) error {
 	_, err := os.Stat(configPath)
+	if err == nil {
+		return nil
+	}
+
+	if !os.IsNotExist(err) {
+		return fmt.Errorf("failed to check config file %s: %w", configPath, err)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
+		return fmt.Errorf("failed to create config directory: %w", err)
+	}
+
+	defaultDataPath, err := BuildDataPath("")
 	if err != nil {
-		if os.IsNotExist(err) {
-			err = os.MkdirAll(filepath.Dir(configPath), 0755)
-			if err != nil {
-				return fmt.Errorf("failed to create config directory: %w", err)
-			}
+		return fmt.Errorf("failed to build default data path: %w", err)
+	}
 
-			err = os.WriteFile(configPath, []byte(defaultConfig), 0644)
-			if err != nil {
-				return fmt.Errorf("failed to create config file: %w", err)
-			}
-			return nil
-		}
+	defaultConf := Config{
+		DataPath: defaultDataPath,
+	}
 
-		return fmt.Errorf("failed to read file %s: %w", configPath, err)
+	err = SaveConfigToFile(configPath, defaultConf)
+	if err != nil {
+		return err
 	}
 
 	return nil
