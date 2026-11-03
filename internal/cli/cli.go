@@ -397,12 +397,12 @@ func (cli *CLI) handleExport() error {
 	return nil
 }
 
-func (cli *CLI) Show() {
+func (cli *CLI) Run() error {
 	for {
 		choice, err := cli.displayMainMenuAndReadChoice()
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				return
+				return nil
 			}
 
 			fmt.Printf("Invalid choice: %v\n", err)
@@ -470,7 +470,7 @@ func (cli *CLI) Show() {
 
 		case 0:
 			fmt.Println("Exit")
-			return
+			return nil
 
 		default:
 			fmt.Println("Invalid choice")
