@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/MichalKrywult/mindgo/internal/app"
 	"github.com/MichalKrywult/mindgo/internal/cli"
@@ -10,53 +12,50 @@ import (
 )
 
 func main() {
+	if err := runMain(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		os.Exit(1)
+	}
+}
 
+func runMain() error {
 	configPath, err := config.BuildConfigPath()
 	if err != nil {
-		fmt.Println("Error with ConfigFile path:", err)
-		return
+		return fmt.Errorf("config path: %w", err)
 	}
 
-	err = config.EnsureConfigFile(configPath)
-	if err != nil {
-		fmt.Println("Error with ConfigFile:", err)
-		return
+	if err := config.EnsureConfigFile(configPath); err != nil {
+		return fmt.Errorf("ensure config file: %w", err)
 	}
 
 	oldConf, err := config.LoadConfigFromFile(configPath)
 	if err != nil {
-		fmt.Println("Error with loading from ConfigFile:", err)
-		return
+		return fmt.Errorf("load config: %w", err)
 	}
 
 	parsedFlags, err := cli.ParseFlags()
 	if err != nil {
-		if err == flag.ErrHelp {
-			return
+		if errors.Is(err, flag.ErrHelp) {
+			return nil //show help is not an err
 		}
-
-		fmt.Println("Error with parsing flags:", err)
-		return
+		return fmt.Errorf("parse flags: %w", err)
 	}
 
 	dataPath, err := cli.SelectDataPath(parsedFlags, oldConf)
 	if err != nil {
-		fmt.Println("Error with path building:", err)
-		return
+		return fmt.Errorf("select data path: %w", err)
 	}
 
 	newConf := config.Config{DataPath: dataPath}
 	if oldConf != newConf {
-		err = config.SaveConfigToFile(configPath, newConf)
-		if err != nil {
-			fmt.Println("Error with saving config to file:", err)
-			return
+		if err := config.SaveConfigToFile(configPath, newConf); err != nil {
+			return fmt.Errorf("save config: %w", err)
 		}
 	}
 
-	err = app.Run(newConf)
-	if err != nil {
-		fmt.Println("Error starting apllication:", err)
-		return
+	if err := app.Run(newConf); err != nil {
+		return fmt.Errorf("start application: %w", err)
 	}
+
+	return nil
 }
