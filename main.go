@@ -36,7 +36,7 @@ func runMain() error {
 	parsedFlags, err := cli.ParseFlags()
 	if err != nil {
 		if errors.Is(err, flag.ErrHelp) {
-			return nil //show help is not an err 
+			return nil //show help is not an err
 		}
 		return fmt.Errorf("parse flags: %w", err)
 	}
