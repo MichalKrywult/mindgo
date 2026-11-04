@@ -56,7 +56,12 @@ func runMain() error {
 		}
 	}
 
-	if err := app.Run(newConf); err != nil {
+	cliApp, err := buildCLI(newConf)
+	if err!=nil{
+		return fmt.Errorf("build cli: %w", err)
+	}
+
+	if err := app.Run(cliApp); err != nil {
 		return fmt.Errorf("start application: %w", err)
 	}
 
