@@ -397,80 +397,73 @@ func (cli *CLI) handleExport() error {
 	return nil
 }
 
-func (cli *CLI) Show() {
+func (cli *CLI) Run() error {
 	for {
 		choice, err := cli.displayMainMenuAndReadChoice()
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				return
+				return nil
 			}
 
-			fmt.Printf("Invalid choice: %v\n", err)
-			continue
+			return fmt.Errorf("failed to read menu choice: %w", err)
 		}
 
 		switch choice {
 		case 1:
-			err := cli.handleAddEntry()
-			if err != nil {
-				fmt.Println(err)
+			if err := cli.handleAddEntry(); err != nil {
+				fmt.Printf("Failed to add entry: %v\n", err)
 				continue
 			}
 
 			fmt.Println("Entry added!")
 
 		case 2:
-			err := cli.handleEditEntry()
-			if err != nil {
-				fmt.Println(err)
+			if err := cli.handleEditEntry(); err != nil {
+				fmt.Printf("Failed to edit entry: %v\n", err)
 				continue
 			}
 
 			fmt.Println("Entry edited!")
 
 		case 3:
-			err := cli.handleRemoveEntry()
-			if err != nil {
-				fmt.Println(err)
+			if err := cli.handleRemoveEntry(); err != nil {
+				fmt.Printf("Failed to remove entry: %v\n", err)
 				continue
 			}
 
 			fmt.Println("Entry removed!")
 
 		case 4:
-			err := cli.handleDisplayingAllEntries()
-			if err != nil {
-				fmt.Println(err)
+			if err := cli.handleDisplayingAllEntries(); err != nil {
+				fmt.Printf("Failed to display entries: %v\n", err)
+				continue
 			}
 
 		case 5:
-			err := cli.handleStatistics()
-			if err != nil {
-				fmt.Println(err)
+			if err := cli.handleStatistics(); err != nil {
+				fmt.Printf("Failed to display statistics: %v\n", err)
 				continue
 			}
 
 			fmt.Println("Statistics displayed!")
 
 		case 6:
-			err := cli.handleExport()
-			if err != nil {
-				fmt.Println(err)
+			if err := cli.handleExport(); err != nil {
+				fmt.Printf("Failed to export entries: %v\n", err)
 				continue
 			}
 
 			fmt.Println("Entries exported successfully")
 
 		case 7:
-			err := cli.handleRemoveAllEntries()
-			if err != nil {
-				fmt.Println(err)
+			if err := cli.handleRemoveAllEntries(); err != nil {
+				fmt.Printf("Failed to remove all entries: %v\n", err)
 				continue
 			}
 
 		case 0:
 			fmt.Println("Exit")
-			return
+			return nil
 
 		default:
 			fmt.Println("Invalid choice")
