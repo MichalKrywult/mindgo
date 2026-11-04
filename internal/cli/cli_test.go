@@ -174,7 +174,7 @@ func TestCLI(t *testing.T) {
 			}
 
 			cli := NewCLI(tracker, strings.NewReader(tt.input))
-			cli.Show()
+			cli.Run()
 
 			entries := tracker.GetEntries()
 

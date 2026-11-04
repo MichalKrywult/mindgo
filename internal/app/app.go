@@ -7,3 +7,11 @@ type Application interface {
 func Run(application Application) error {
     return application.Run()
 }
+
+type mockApplication struct {
+    err error
+}
+
+func (m *mockApplication) Run() error {
+    return m.err
+}
