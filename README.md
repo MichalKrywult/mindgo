@@ -89,6 +89,12 @@ Run tests:
 go test ./...
 ```
 
+## Contributing
+
+Contributions are welcome! If you'd like to report a bug,
+suggest a feature, or contribute code, check out
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## License
 
 See LICENSE for details.
