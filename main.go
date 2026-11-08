@@ -5,10 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/MichalKrywult/mindgo/internal/app"
 	"github.com/MichalKrywult/mindgo/internal/cli"
 	"github.com/MichalKrywult/mindgo/internal/config"
+	"github.com/MichalKrywult/mindgo/internal/storage"
+	"github.com/MichalKrywult/mindgo/internal/tracker"
 )
 
 func main() {
@@ -53,9 +56,31 @@ func runMain() error {
 		}
 	}
 
-	if err := app.Run(newConf); err != nil {
+	cliApp, err := buildCLI(newConf)
+	if err != nil {
+		return fmt.Errorf("build cli: %w", err)
+	}
+
+	if err := app.Run(cliApp); err != nil {
 		return fmt.Errorf("start application: %w", err)
 	}
 
 	return nil
+}
+
+func buildCLI(conf config.Config) (*cli.CLI, error) {
+
+	if err := os.MkdirAll(filepath.Dir(conf.DataPath), 0755); err != nil {
+		return nil, err
+	}
+
+	fileStorage := storage.FileStorage{Filename: conf.DataPath}
+	moodTracker, err := tracker.NewMoodTracker(&fileStorage)
+	if err != nil {
+		return nil, err
+	}
+
+	cliApp := cli.NewCLI(moodTracker, os.Stdin) // the tracker is a pointer, received from NewMoodTracker function
+
+	return cliApp, nil
 }
