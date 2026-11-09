@@ -11,6 +11,7 @@ import (
 type flags struct {
 	file string
 	path string
+	Mode bool
 }
 
 func ParseFlags() (flags, error) {
@@ -21,6 +22,7 @@ func ParseFlags() (flags, error) {
 
 	file := fs.String("file", "", "moods saving file name in default location")
 	path := fs.String("path", "", "full path to moods saving file")
+	mode := fs.Bool("server", false, "set up local http server")
 	//instead of global flags we use our own flagSet
 
 	err := fs.Parse(os.Args[1:])
@@ -49,10 +51,10 @@ func ParseFlags() (flags, error) {
 	}
 
 	if pathSet {
-		return flags{path: *path}, nil
+		return flags{path: *path, Mode: *mode}, nil
 	}
 
-	return flags{file: *file}, nil
+	return flags{file: *file, Mode: *mode}, nil
 }
 
 func SelectDataPath(parsedFlags flags, conf config.Config) (string, error) {
