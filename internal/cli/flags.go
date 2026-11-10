@@ -11,7 +11,7 @@ import (
 type flags struct {
 	file   string
 	path   string
-	server bool
+	Server bool
 }
 
 func ParseFlags() (flags, error) {
@@ -50,10 +50,10 @@ func ParseFlags() (flags, error) {
 	}
 
 	if pathSet {
-		return flags{path: *path, server: *mode}, nil
+		return flags{path: *path, Server: *mode}, nil
 	}
 
-	return flags{file: *file, server: *mode}, nil
+	return flags{file: *file, Server: *mode}, nil
 }
 
 func SelectDataPath(parsedFlags flags, conf config.Config) (string, error) {
