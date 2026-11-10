@@ -9,9 +9,9 @@ import (
 )
 
 type flags struct {
-	file string
-	path string
-	Mode bool
+	file   string
+	path   string
+	server bool
 }
 
 func ParseFlags() (flags, error) {
@@ -22,7 +22,7 @@ func ParseFlags() (flags, error) {
 
 	file := fs.String("file", "", "moods saving file name in default location")
 	path := fs.String("path", "", "full path to moods saving file")
-	mode := fs.Bool("server", false, "set up local http server")
+	mode := fs.Bool("server", false, "start local HTTP server")
 	//instead of global flags we use our own flagSet
 
 	err := fs.Parse(os.Args[1:])
@@ -37,11 +37,10 @@ func ParseFlags() (flags, error) {
 	// fs(*flag.FlagSet).Visit iterates over flags that were provided by the user
 	// the function passed to Visit is anonymous and is called once for each flag
 	fs.Visit(func(f *flag.Flag) {
-		if f.Name == "file" {
+		switch f.Name {
+		case "file":
 			fileSet = true
-		}
-
-		if f.Name == "path" {
+		case "path":
 			pathSet = true
 		}
 	})
@@ -51,10 +50,10 @@ func ParseFlags() (flags, error) {
 	}
 
 	if pathSet {
-		return flags{path: *path, Mode: *mode}, nil
+		return flags{path: *path, server: *mode}, nil
 	}
 
-	return flags{file: *file, Mode: *mode}, nil
+	return flags{file: *file, server: *mode}, nil
 }
 
 func SelectDataPath(parsedFlags flags, conf config.Config) (string, error) {
