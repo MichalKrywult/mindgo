@@ -10,10 +10,12 @@ import (
 	"github.com/MichalKrywult/mindgo/internal/domain"
 )
 
-type mockProvider struct{}
+type mockProvider struct {
+	entries []domain.MoodEntry
+}
 
 func (m mockProvider) GetEntries() []domain.MoodEntry {
-	return []domain.MoodEntry{}
+	return m.entries
 }
 
 func TestGreetUser(t *testing.T) {
@@ -51,11 +53,21 @@ func TestGetEntries(t *testing.T) {
 			name:            "no entries",
 			expectedEntries: []domain.MoodEntry{},
 		},
+		{
+			name:            "one entry",
+			expectedEntries: []domain.MoodEntry{{ID:1, Mood: 1}},
+		},
+		{
+			name:            "multiple entries",
+			expectedEntries: []domain.MoodEntry{{ID:1, Mood: 1},{ID:2, Mood: 2},{ID:3, Mood: 3},{ID:4, Mood: 4}},
+		},
 	}
 
-	server := NewHTTPServer(mockProvider{})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			server := NewHTTPServer(mockProvider{entries: tt.expectedEntries})
+
 			req, err := http.NewRequest(http.MethodGet, "/api/entries", nil)
 			if err != nil {
 				t.Fatal("creating request failed")
