@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
@@ -16,6 +17,59 @@ type mockProvider struct {
 
 func (m mockProvider) GetEntries() []domain.MoodEntry {
 	return m.entries
+}
+
+func TestRouting(t *testing.T) {
+	tests := []struct {
+		name         string
+		method       string
+		url          string
+		body         string
+		expectedCode int
+	}{
+		{
+			name:         "default path",
+			url:          "/",
+			method:       http.MethodGet,
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:         "entries path, correct method",
+			url:          "/api/entries",
+			method:       http.MethodGet,
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:         "entries path, wrong method",
+			url:          "/api/entries",
+			method:       http.MethodPut,
+			expectedCode: http.StatusMethodNotAllowed,
+		},
+		{
+			name:         "unknown path",
+			url:          "/unknown",
+			method:       http.MethodGet,
+			expectedCode: http.StatusNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := NewHTTPServer(mockProvider{})
+
+			req, err := http.NewRequest(tt.method, tt.url, strings.NewReader(tt.body))
+			if err != nil {
+				t.Fatal("creating request failed")
+			}
+
+			rec := httptest.NewRecorder()       // pretends to be a receiver
+			server.routes().ServeHTTP(rec, req) // let the mux choose correct path
+
+			if rec.Code != tt.expectedCode {
+				t.Errorf("expected status %v, got %v", tt.expectedCode, rec.Code)
+			}
+		})
+	}
 }
 
 func TestGreetUser(t *testing.T) {
