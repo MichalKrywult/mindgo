@@ -21,13 +21,18 @@ func NewHTTPServer(provider entryProvider) *HTTPServer {
 }
 
 func (server *HTTPServer) Run() error {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", server.greetUser)
-
-	mux.HandleFunc("/api/entries", server.getEntries)
 
 	fmt.Println("Server works!")
-	return http.ListenAndServe(":8080", mux)
+	return http.ListenAndServe(":8080", server.routes())
+}
+
+func (server *HTTPServer) routes() *http.ServeMux {
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("GET /{$}", server.greetUser)
+	mux.HandleFunc("GET /api/entries", server.getEntries)
+
+	return mux
 }
 
 func (server *HTTPServer) greetUser(w http.ResponseWriter, r *http.Request) {

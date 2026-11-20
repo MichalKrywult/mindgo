@@ -55,11 +55,11 @@ func TestGetEntries(t *testing.T) {
 		},
 		{
 			name:            "one entry",
-			expectedEntries: []domain.MoodEntry{{ID:1, Mood: 1}},
+			expectedEntries: []domain.MoodEntry{{ID: 1, Mood: 1}},
 		},
 		{
 			name:            "multiple entries",
-			expectedEntries: []domain.MoodEntry{{ID:1, Mood: 1},{ID:2, Mood: 2},{ID:3, Mood: 3},{ID:4, Mood: 4}},
+			expectedEntries: []domain.MoodEntry{{ID: 1, Mood: 1}, {ID: 2, Mood: 2}, {ID: 3, Mood: 3}, {ID: 4, Mood: 4}},
 		},
 	}
 
