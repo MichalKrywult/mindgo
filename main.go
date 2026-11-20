@@ -10,6 +10,7 @@ import (
 	"github.com/MichalKrywult/mindgo/internal/app"
 	"github.com/MichalKrywult/mindgo/internal/cli"
 	"github.com/MichalKrywult/mindgo/internal/config"
+	"github.com/MichalKrywult/mindgo/internal/httpserver"
 	"github.com/MichalKrywult/mindgo/internal/storage"
 	"github.com/MichalKrywult/mindgo/internal/tracker"
 )
@@ -56,31 +57,45 @@ func runMain() error {
 		}
 	}
 
-	cliApp, err := buildCLI(newConf)
+	moodTracker, err := buildTracker(newConf)
 	if err != nil {
-		return fmt.Errorf("build cli: %w", err)
+		return fmt.Errorf("build tracker: %w", err)
 	}
 
-	if err := app.Run(cliApp); err != nil {
+	var application app.Application
+
+	if parsedFlags.Server {
+		application = buildHTTPserver(moodTracker)
+	} else {
+		application = buildCLI(moodTracker)
+	}
+
+	if err := app.Run(application); err != nil {
 		return fmt.Errorf("start application: %w", err)
 	}
 
 	return nil
 }
 
-func buildCLI(conf config.Config) (*cli.CLI, error) {
-
+func buildTracker(conf config.Config) (*tracker.MoodTracker, error) {
 	if err := os.MkdirAll(filepath.Dir(conf.DataPath), 0755); err != nil {
 		return nil, err
 	}
 
 	fileStorage := storage.FileStorage{Filename: conf.DataPath}
+
 	moodTracker, err := tracker.NewMoodTracker(&fileStorage)
 	if err != nil {
 		return nil, err
 	}
 
-	cliApp := cli.NewCLI(moodTracker, os.Stdin) // the tracker is a pointer, received from NewMoodTracker function
+	return moodTracker, nil
+}
 
-	return cliApp, nil
+func buildCLI(moodTracker *tracker.MoodTracker) *cli.CLI {
+	return cli.NewCLI(moodTracker, os.Stdin)
+}
+
+func buildHTTPserver(moodTracker *tracker.MoodTracker) *httpserver.HTTPServer {
+	return httpserver.NewHTTPServer(moodTracker)
 }
