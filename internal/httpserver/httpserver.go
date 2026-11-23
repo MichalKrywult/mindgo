@@ -3,6 +3,7 @@ package httpserver
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -54,9 +55,20 @@ func (server *HTTPServer) greetUser(w http.ResponseWriter, r *http.Request) {
 
 func (server *HTTPServer) createEntry(w http.ResponseWriter, r *http.Request) {
 	var request createEntryRequest
-	err := json.NewDecoder(r.Body).Decode(&request)
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
+	err := decoder.Decode(&request)
 	if err != nil {
-		http.Error(w, "placeholder", http.StatusBadRequest)
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+
+	var extra any
+	err = decoder.Decode(&extra)
+	if err != io.EOF { // second decoding checks whether request was not valid (was there any garbage?)
+		http.Error(w, "invalid request", http.StatusBadRequest)
 		return
 	}
 
@@ -66,7 +78,6 @@ func (server *HTTPServer) createEntry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var date time.Time
-
 	if request.Date == "" {
 		date = time.Now()
 	} else {
