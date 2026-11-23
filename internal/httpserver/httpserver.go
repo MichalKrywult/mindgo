@@ -33,6 +33,7 @@ func (server *HTTPServer) routes() *http.ServeMux {
 
 	mux.HandleFunc("GET /{$}", server.greetUser)
 	mux.HandleFunc("GET /api/entries", server.getEntries)
+	mux.HandleFunc("POST /api/entries", server.createEntry)
 
 	return mux
 }
@@ -60,17 +61,28 @@ func (server *HTTPServer) createEntry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if request.Mood == nil {
-		http.Error(w, "placeholder", http.StatusBadRequest)
+		http.Error(w, "mood value is obligatory", http.StatusBadRequest)
 		return
 	}
 
-	date, err := time.Parse(time.RFC3339, request.Date)
+	var date time.Time
+
+	if request.Date == "" {
+		date = time.Now()
+	} else {
+		date, err = time.Parse("2006-01-02 15:04", request.Date)
+		if err != nil {
+			http.Error(w, "Invalid date", http.StatusBadRequest)
+			return
+		}
+	}
+
+	entry, err := domain.NewMoodEntry(*request.Mood, date, request.Note, request.Tags)
 	if err != nil {
-		http.Error(w, "Invalid date", http.StatusBadRequest)
+		http.Error(w, "something went wrong", http.StatusBadRequest)
 		return
 	}
 
-	entry := domain.MoodEntry{Mood: *(request.Mood), Date: date, Note: request.Note, Tags: request.Tags}
 	err = server.provider.AddEntry(entry)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
