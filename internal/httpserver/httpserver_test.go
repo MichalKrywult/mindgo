@@ -32,13 +32,19 @@ func TestRouting(t *testing.T) {
 		expectedCode int
 	}{
 		{
+			name:         "unknown path",
+			url:          "/unknown",
+			method:       http.MethodGet,
+			expectedCode: http.StatusNotFound,
+		},
+		{
 			name:         "default path",
 			url:          "/",
 			method:       http.MethodGet,
 			expectedCode: http.StatusOK,
 		},
 		{
-			name:         "entries path, correct method",
+			name:         "entries path, correct Get method",
 			url:          "/api/entries",
 			method:       http.MethodGet,
 			expectedCode: http.StatusOK,
@@ -50,10 +56,11 @@ func TestRouting(t *testing.T) {
 			expectedCode: http.StatusMethodNotAllowed,
 		},
 		{
-			name:         "unknown path",
-			url:          "/unknown",
-			method:       http.MethodGet,
-			expectedCode: http.StatusNotFound,
+			name:         "create entry path, Post method",
+			url:          "/api/entries",
+			method:       http.MethodPost,
+			expectedCode: http.StatusCreated,
+			body: `{"mood":5}`,
 		},
 	}
 
