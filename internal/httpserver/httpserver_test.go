@@ -19,6 +19,10 @@ func (m mockProvider) GetEntries() []domain.MoodEntry {
 	return m.entries
 }
 
+func (m mockProvider) AddEntry(domain.MoodEntry) error {
+	return nil
+}
+
 func TestRouting(t *testing.T) {
 	tests := []struct {
 		name         string
