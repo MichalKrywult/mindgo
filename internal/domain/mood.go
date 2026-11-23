@@ -23,6 +23,10 @@ func NewMoodEntry(mood int, date time.Time, note string, tags []string) (MoodEnt
 		return MoodEntry{}, errors.New("invalid Mood range")
 	}
 
+	if date.IsZero() {
+		return MoodEntry{}, errors.New("date cannot be zero")
+	}
+
 	seen := make(map[string]bool, len(tags))
 	for _, tag := range tags {
 		if seen[tag] == true {
