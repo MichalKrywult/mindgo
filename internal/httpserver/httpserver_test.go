@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/MichalKrywult/mindgo/internal/domain"
 )
@@ -19,7 +20,8 @@ func (m mockProvider) GetEntries() []domain.MoodEntry {
 	return m.entries
 }
 
-func (m mockProvider) AddEntry(domain.MoodEntry) error {
+func (m *mockProvider) AddEntry(addEntry domain.MoodEntry) error {
+	m.entries = append(m.entries, addEntry)
 	return nil
 }
 
@@ -60,13 +62,13 @@ func TestRouting(t *testing.T) {
 			url:          "/api/entries",
 			method:       http.MethodPost,
 			expectedCode: http.StatusCreated,
-			body: `{"mood":5}`,
+			body:         `{"mood":5}`,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := NewHTTPServer(mockProvider{})
+			server := NewHTTPServer(&mockProvider{})
 
 			req, err := http.NewRequest(tt.method, tt.url, strings.NewReader(tt.body))
 			if err != nil {
@@ -85,7 +87,7 @@ func TestRouting(t *testing.T) {
 
 func TestGreetUser(t *testing.T) {
 
-	server := NewHTTPServer(mockProvider{})
+	server := NewHTTPServer(&mockProvider{})
 
 	req, err := http.NewRequest(http.MethodGet, "/", nil) // no body
 	if err != nil {
@@ -131,7 +133,7 @@ func TestGetEntries(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			server := NewHTTPServer(mockProvider{entries: tt.expectedEntries})
+			server := NewHTTPServer(&mockProvider{entries: tt.expectedEntries})
 
 			req, err := http.NewRequest(http.MethodGet, "/api/entries", nil)
 			if err != nil {
@@ -159,6 +161,63 @@ func TestGetEntries(t *testing.T) {
 				t.Errorf("expected %v, got %v", tt.expectedEntries, entries)
 			}
 
+		})
+	}
+}
+func TestCreateEntry(t *testing.T) {
+
+	date, err := time.Parse("2006-01-02 15:04", "2026-11-27 14:30")
+	if err != nil {
+		t.Fatal("error preparing date")
+	}
+
+	tests := []struct {
+		name            string
+		body            string
+		expectedCode    int
+		expectedEntries []domain.MoodEntry
+	}{
+		{
+			name:            "successful entry creation",
+			body:            `{"mood": 5, "date": "2026-11-27 14:30"}`,
+			expectedEntries: []domain.MoodEntry{{Mood: 5, Date: date, Tags: []string{}}},
+			// adding tags assertion is necessary -> reflect.DeepEqual
+			// distinguishes nil and empty Tags list
+			expectedCode: http.StatusCreated,
+		},
+		{
+			name:         "invalid request body",
+			body:         `invalid json`,
+			expectedCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &mockProvider{}
+			server := NewHTTPServer(mock)
+
+			req, err := http.NewRequest(http.MethodPost, "/api/entries", strings.NewReader(tt.body))
+			if err != nil {
+				t.Fatal("creating request failed")
+			}
+
+			rec := httptest.NewRecorder()
+			server.createEntry(rec, req)
+
+			if rec.Code != tt.expectedCode {
+				t.Errorf("expected status %v, got %v", tt.expectedCode, rec.Code)
+			}
+
+			if len(mock.entries) != len(tt.expectedEntries) {
+				t.Fatalf("expected %d entries, got %d", len(tt.expectedEntries), len(mock.entries))
+			}
+
+			if !reflect.DeepEqual(mock.entries, tt.expectedEntries) {
+				t.Errorf("expected entries %v, got %v", tt.expectedEntries, mock.entries)
+			}
+			t.Logf("expected: %#v", tt.expectedEntries)
+			t.Logf("got:      %#v", mock.entries)
 		})
 	}
 }
